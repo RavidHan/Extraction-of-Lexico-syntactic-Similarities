@@ -47,7 +47,11 @@ public class MapReducer1 {
                     }
                     wordArray.add(wordData);
                 }
-                context.write(Sentence.analyze(wordArray), new DoubleWritable(count));
+                try {
+                    context.write(Sentence.analyze(wordArray), new DoubleWritable(count));
+                } catch (Sentence.NotValidSentenceException e) {
+                    e.printStackTrace();
+                }
             }
 
         }

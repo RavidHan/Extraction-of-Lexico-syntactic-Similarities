@@ -17,6 +17,18 @@ public class Sentence implements WritableComparable<Sentence> {
     private Text slotY;
     private BasicNode tree;
 
+    public Text getSlotX() {
+        return slotX;
+    }
+
+    public Text getP() {
+        return p;
+    }
+
+    public Text getSlotY() {
+        return slotY;
+    }
+
     public static class WordData {
         int index;
         String word;
@@ -55,7 +67,7 @@ public class Sentence implements WritableComparable<Sentence> {
         }
     }
 
-    public void setSentence(String slotX, String p, String slotY) {
+    public Sentence(String slotX, String p, String slotY) {
         this.p = new Text(p);
         this.slotX = new Text(slotX);
         this.slotY = new Text(slotY);

@@ -22,14 +22,14 @@ public class Main {
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, "word count");
         job.setJarByClass(MapReducer1.class);
-        job.setMapperClass(MapReducer1.TokenizerMapper.class);
+        job.setMapperClass(MapReducer1.Mapper1.class);
         job.setMapOutputKeyClass(Sentence.class);
         job.setMapOutputValueClass(DoubleWritable.class);
-        job.setCombinerClass(MapReducer1.IntSumReducer.class);
-        job.setReducerClass(MapReducer1.IntSumReducer.class);
+        job.setReducerClass(MapReducer1.Reducer1.class);
         job.setOutputKeyClass(Sentence.class);
         job.setOutputValueClass(DoubleWritable.class);
-        FileInputFormat.addInputPath(job, new Path("input.txt"));
+        job.setNumReduceTasks(1);
+        FileInputFormat.addInputPath(job, new Path("input"));
         FileOutputFormat.setOutputPath(job, new Path("output"));
 
 //        Configuration conf2 = new Configuration();

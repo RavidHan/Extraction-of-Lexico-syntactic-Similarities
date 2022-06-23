@@ -1,22 +1,13 @@
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.RawKeyValueIterator;
-import org.apache.hadoop.mapred.Task.CombinerRunner;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class MapReducer1 {
-    public static class TokenizerMapper
+    public static class Mapper1
             extends Mapper<Object, Text, Sentence, DoubleWritable> {
 
         public void map(Object key, Text value, Context context
@@ -43,43 +34,59 @@ public class MapReducer1 {
                 } else {
                     // breaking a word sequence
                     Sentence.WordData wordData = new Sentence.WordData(wordArray.size()+1, tempData.get(0), Integer.parseInt(tempData.get(3)), tempData.get(1));
-//                    if (wordData.superiorIndex == 0 && !isValidVerb(wordData.preposition)) {
-//                        System.out.println(temp + ": head is not in a good preposition");
-//                        return;
-//                    }
+                    if (wordData.superiorIndex == 0 && !wordData.isValidVerb()) {
+                        System.out.println(temp + ": head is not in a good preposition");
+                        return;
+                    }
                     wordArray.add(wordData);
                 }
             }
-            try {
-                Sentence sentence = Sentence.analyze(wordArray);
-                context.write(sentence, new DoubleWritable(count));
-                context.write(new Sentence(sentence.getSlotX().toString(), "*", "*"), new DoubleWritable(count));
-                context.write(new Sentence("*", "*", "*"), new DoubleWritable(count));
-            } catch (Sentence.NotValidSentenceException e) {
-                e.printStackTrace();
+            if (!wordArray.getFirst().isNoun() || !wordArray.getLast().isNoun()) {
+                System.out.println("SlotX: " + wordArray.getFirst().word + " or SlotY: " + wordArray.getLast().word + ": head is not in a good preposition");
+                return;
             }
+            StringBuilder body = new StringBuilder();
+            for (Sentence.WordData word:
+                    wordArray.subList(1, wordArray.size()-1)) {
+                body.append(word.word).append(" ");
+            }
+            Sentence sentence = new Sentence(wordArray.getFirst().word, body.substring(0, body.length()-1), wordArray.getLast().word);
+            context.write(sentence, new DoubleWritable(count));
+            context.write(new Sentence(sentence.getSlotX().toString(), "*", "*"), new DoubleWritable(count));
+            context.write(new Sentence("*", "*", "*"), new DoubleWritable(count));
         }
-
-        private boolean isValidVerb(String preposition) {
-            return true;
-        }
-
     }
 
-    public static class IntSumReducer
+    public static class Reducer1
             extends Reducer<Sentence, DoubleWritable, Sentence, DoubleWritable> {
         private DoubleWritable xCount = new DoubleWritable();
         private Text slotX = new Text();
+        private Text star = new Text("*");
 
         public void reduce(Sentence key, Iterable<DoubleWritable> values,
                            Context context
         ) throws IOException, InterruptedException {
             double sum = 0;
 
-            for (DoubleWritable val : values) {
-                sum += val.get();
+            if (key.getSlotX().equals(star) && key.getSlotY().equals(star)){
+                for (DoubleWritable val : values) {
+                    sum += val.get();
+                }
+                context.write(key, new DoubleWritable(sum));
+                return;
             }
-            context.write(key, new DoubleWritable(sum));
+            if (!slotX.equals(key.getSlotX()) && key.getSlotY().equals(star)){
+                for (DoubleWritable val : values) {
+                    sum += val.get();
+                }
+                xCount.set(sum);
+                return;
+            }
+            key.setxAmount(xCount);
+            for (DoubleWritable val:
+                 values) {
+                context.write(key, val);
+            }
         }
     }
 

@@ -12,6 +12,8 @@ public class MapReducer1 {
 
         public void map(Object key, Text value, Context context
         ) throws IOException, InterruptedException {
+            if(value.toString().length() <= 1) // Sometimes the input is just byte 0.
+                return;
             StringTokenizer st = new StringTokenizer(value.toString());
             int count = 0;
             LinkedList<Sentence.WordData> wordArray = new LinkedList<>();
@@ -26,9 +28,15 @@ public class MapReducer1 {
                 if (head.isEmpty()) {
                     head = temp;
                 } else if (tempData.size() == 1) {
-                    count = Integer.parseInt(temp);
-                    break;
-                } else if (tempData.size() < 4) {
+                    try {
+                        count = Integer.parseInt(temp);
+                        break;
+                    }
+                    catch(Exception e){
+                        System.out.println(temp + " cannot be parsed as int");
+                        return;
+                    }
+                } else if (tempData.size() != 4) { // Sometimes we get something like "//NNP/dep/3" which causes breakages
                     System.out.println(temp + " is not a valid data");
                     return;
                 } else {
@@ -39,6 +47,8 @@ public class MapReducer1 {
                         return;
                     }
                     wordArray.add(wordData);
+
+
                 }
             }
             if (!wordArray.getFirst().isNoun() || !wordArray.getLast().isNoun()) {
@@ -66,7 +76,8 @@ public class MapReducer1 {
         public void reduce(Sentence key, Iterable<DoubleWritable> values,
                            Context context
         ) throws IOException, InterruptedException {
-            double sum = 0;
+
+           double sum = 0;
 
             if (key.getSlotX().equals(star) && key.getSlotY().equals(star)){
                 for (DoubleWritable val : values) {
@@ -87,6 +98,8 @@ public class MapReducer1 {
                  values) {
                 context.write(key, val);
             }
+
+
         }
     }
 

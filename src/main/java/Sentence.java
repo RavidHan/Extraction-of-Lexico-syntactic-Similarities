@@ -14,6 +14,14 @@ public class Sentence implements WritableComparable<Sentence> {
     private DoubleWritable xAmount;
     private DoubleWritable yAmount;
 
+    Sentence(){
+        this.slotX = new Text("");
+        this.p = new Text("");
+        this.slotY = new Text("");
+        this.xAmount = new DoubleWritable(0);
+        this.yAmount = new DoubleWritable(0);
+    }
+
     public DoubleWritable getyAmount() {
         return yAmount;
     }

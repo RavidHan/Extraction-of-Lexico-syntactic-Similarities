@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         Configuration conf = new Configuration();
-        Job job = Job.getInstance(conf, "word count");
+        Job job = Job.getInstance(conf, "MapReduce1_SlotX");
         job.setJarByClass(MapReducer1.class);
         job.setMapperClass(MapReducer1.Mapper1.class);
         job.setMapOutputKeyClass(Sentence.class);
@@ -24,13 +24,31 @@ public class Main {
         job.setOutputKeyClass(Sentence.class);
         job.setOutputValueClass(DoubleWritable.class);
         FileInputFormat.addInputPath(job, new Path("input"));
-        FileOutputFormat.setOutputPath(job, new Path("output"));
+        FileOutputFormat.setOutputPath(job, new Path("output_1"));
 
-        ControlledJob jobOneControl = new ControlledJob(job.getConfiguration());
-        jobOneControl.setJob(job);
+        Configuration conf2 = new Configuration();
+        Job job2 = Job.getInstance(conf2, "MapReduce2_SlotY");
+        job2.setJarByClass(MapReducer2.class);
+        job2.setMapperClass(MapReducer2.Mapper2.class);
+        job2.setMapOutputKeyClass(Sentence.class);
+        job2.setMapOutputValueClass(DoubleWritable.class);
+        job2.setReducerClass(MapReducer2.Reducer2.class);
+        job2.setPartitionerClass(MapReducer2.SlotXPartitioner.class);
+        job2.setOutputKeyClass(Sentence.class);
+        job2.setOutputValueClass(DoubleWritable.class);
+        FileInputFormat.addInputPath(job2, new Path("output_1"));
+        FileOutputFormat.setOutputPath(job2, new Path("output_2"));
+
+        ControlledJob jobControl1 = new ControlledJob(job.getConfiguration());
+        jobControl1.setJob(job);
+        ControlledJob jobControl2 = new ControlledJob(job2.getConfiguration());
+        jobControl2.setJob(job2);
 
         JobControl jobControl = new JobControl("job-control");
-        jobControl.addJob(jobOneControl);
+        jobControl.addJob(jobControl1);
+        jobControl.addJob(jobControl2);
+        jobControl2.addDependingJob(jobControl1);
+
 
         Thread jobControlThread = new Thread(jobControl);
         jobControlThread.start();

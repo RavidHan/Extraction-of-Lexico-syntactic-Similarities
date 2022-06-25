@@ -52,7 +52,6 @@ public class MapReducer1 {
                 }
             }
             if (!wordArray.getFirst().isNoun() || !wordArray.getLast().isNoun()) {
-                System.out.println("SlotX: " + wordArray.getFirst().word + " or SlotY: " + wordArray.getLast().word + ": head is not in a good preposition");
                 return;
             }
             StringBuilder body = new StringBuilder();
@@ -100,7 +99,7 @@ public class MapReducer1 {
                 sum += val.get();
             }
             writable_sum.set(sum);
-            key.setxAmount(new DoubleWritable(xCount));
+            key.setxAmount(xCount);
             context.write(key, writable_sum);
 
 

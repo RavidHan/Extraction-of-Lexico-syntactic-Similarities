@@ -28,16 +28,16 @@ public class Sentence implements WritableComparable<Sentence> {
         return yAmount;
     }
 
-    public void setyAmount(DoubleWritable yAmount) {
-        this.yAmount = yAmount;
+    public void setyAmount(double yAmount) {
+        this.yAmount = new DoubleWritable(yAmount);
     }
 
     public DoubleWritable getxAmount() {
         return xAmount;
     }
 
-    public void setxAmount(DoubleWritable xAmount) {
-        this.xAmount = xAmount;
+    public void setxAmount(double xAmount) {
+        this.xAmount = new DoubleWritable(xAmount);
     }
 
     public Text getSlotX() {
@@ -86,6 +86,11 @@ public class Sentence implements WritableComparable<Sentence> {
         this.yAmount = new DoubleWritable(0);
     }
 
+    public void ReverseSentence(){
+        Text temp = slotX;
+        slotX = slotY;
+        slotY = temp;
+    }
     @Override
     public int compareTo(Sentence o) {
         int ret = this.slotX.compareTo(o.slotX);

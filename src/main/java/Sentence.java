@@ -5,6 +5,8 @@ import org.apache.hadoop.io.WritableComparable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Sentence implements WritableComparable<Sentence> {
 
@@ -64,11 +66,15 @@ public class Sentence implements WritableComparable<Sentence> {
         }
 
         public boolean isNoun() {
-            return true;
+            String[] valid_nouns = {"NN", "NNS", "NNP", "NNPS", "PRP"};
+            boolean value = Arrays.asList(valid_nouns).contains(this.preposition);
+            return value;
         }
 
         public boolean isValidVerb() {
-            return true;
+            String[] valid_verbs = {"VB", "VBD", "VBG", "VBN", "VBP", "VBZ"};
+            boolean value = Arrays.asList(valid_verbs).contains(this.preposition);
+            return value;
         }
     }
 

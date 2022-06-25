@@ -1,6 +1,7 @@
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
@@ -43,7 +44,6 @@ public class MapReducer1 {
                     // breaking a word sequence
                     Sentence.WordData wordData = new Sentence.WordData(wordArray.size()+1, tempData.get(0), Integer.parseInt(tempData.get(3)), tempData.get(1));
                     if (wordData.superiorIndex == 0 && !wordData.isValidVerb()) {
-                        System.out.println(temp + ": head is not in a good preposition");
                         return;
                     }
                     wordArray.add(wordData);
@@ -69,9 +69,10 @@ public class MapReducer1 {
 
     public static class Reducer1
             extends Reducer<Sentence, DoubleWritable, Sentence, DoubleWritable> {
-        private DoubleWritable xCount = new DoubleWritable();
-        private Text slotX = new Text();
+        private double xCount = -1;
+        private String slotX = "";
         private Text star = new Text("*");
+        private DoubleWritable writable_sum = new DoubleWritable();
 
         public void reduce(Sentence key, Iterable<DoubleWritable> values,
                            Context context
@@ -83,30 +84,33 @@ public class MapReducer1 {
                 for (DoubleWritable val : values) {
                     sum += val.get();
                 }
-                context.write(key, new DoubleWritable(sum));
+                writable_sum.set(sum);
+                context.write(key, writable_sum);
                 return;
             }
             if (!slotX.equals(key.getSlotX()) && key.getSlotY().equals(star)){
                 for (DoubleWritable val : values) {
                     sum += val.get();
                 }
-                xCount.set(sum);
+                xCount = sum;
                 return;
             }
-            key.setxAmount(xCount);
-            for (DoubleWritable val:
-                 values) {
-                context.write(key, val);
+
+            for (DoubleWritable val: values) {
+                sum += val.get();
             }
+            writable_sum.set(sum);
+            key.setxAmount(new DoubleWritable(xCount));
+            context.write(key, writable_sum);
 
 
         }
     }
 
-//    public static class DecadePartitioner1 extends Partitioner<Sentence, DoubleWritable> {
-//        @Override
-//        public int getPartition(WordAndYear key, DoubleWritable value, int i) {
-//            return key.getDecade()/10 % i;
-//        }
-//    }
+    public static class SlotXPartitioner extends Partitioner<Sentence, DoubleWritable> {
+        @Override
+        public int getPartition(Sentence sentence, DoubleWritable doubleWritable, int i) {
+            return sentence.getSlotX().hashCode() % i;
+        }
+    }
 }

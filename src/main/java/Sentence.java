@@ -100,7 +100,7 @@ public class Sentence implements WritableComparable<Sentence> {
 
     @Override
     public  String toString(){
-        return String.format("%s\t%s\t%s", this.slotX, this.p, this.slotY);
+        return String.format("%s\t%s\t%s\t%s\t%s", this.slotX, this.p, this.slotY, this.xAmount.toString(), this.yAmount.toString());
     }
 
     @Override

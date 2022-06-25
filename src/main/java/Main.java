@@ -7,6 +7,8 @@ import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+import java.util.Map;
+
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -18,6 +20,7 @@ public class Main {
         job.setMapOutputKeyClass(Sentence.class);
         job.setMapOutputValueClass(DoubleWritable.class);
         job.setReducerClass(MapReducer1.Reducer1.class);
+        job.setPartitionerClass(MapReducer1.SlotXPartitioner.class);
         job.setOutputKeyClass(Sentence.class);
         job.setOutputValueClass(DoubleWritable.class);
         FileInputFormat.addInputPath(job, new Path("input"));

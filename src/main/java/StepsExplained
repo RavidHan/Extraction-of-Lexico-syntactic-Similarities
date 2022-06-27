@@ -4,14 +4,20 @@
             /*
 
             Class SentenceOne -
-            String FirstFiller, String slotX, String Path, String slotY, String SecondFiller, Double SumOfSlotX, Double SlotX_Filler
+            String FirstFiller,
+            String slotX,
+            String Path,
+            String slotY,
+            String SecondFiller,
+            Double SumOfSlotX,
+            Double SlotX_Filler
 
             Comparable: slotX, FirstFiller, path, slotY, SecondFiller
             Partitioner: slotX
 
 
             First Mapper
-            // <automobile> <nsubj> <start from> <pobj> <rest> 0 0 0 0
+            // <automobile> <nsubj> <start from> <pobj> <rest> 0 0
             // <automobile> <nsubj>  *  *  *
             // <rest> <pobj>  * * *
             // *  <pobj>  *  *  *
@@ -25,6 +31,8 @@
             // <rest> <pobj>  * * * (sum)
             ....
 
+
+
             -----------------------------------------------------------------------
             Class SentenceTwo -
             String FirstFiller, String slotX, String Path, String slotY, String SecondFiller, Double SumOfSlotX,
@@ -33,6 +41,10 @@
             Comparable: slotX, FirstFiller, path, slotY, SecondFiller
             Partitioner: slotX
 
+            Inputs:
+            // *  <nsubj>  *  *  * 0 0 (sum)
+            // <automobile> <nsubj>  *  *  * 0 0 (sum)
+            // <automobile> <nsubj> <start from> <pobj> <rest> 14 17 0 0
 
             Second Mapper
             // *  <nsubj>  *  *  * (sum)

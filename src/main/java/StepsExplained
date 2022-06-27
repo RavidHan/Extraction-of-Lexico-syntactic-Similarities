@@ -1,0 +1,75 @@
+// automobile/NN/nsubj/2 start/VB/ROOT/0 from/IN/prep/2 rest/NN/pobj/3
+
+
+            /*
+
+            Class SentenceOne -
+            String FirstFiller, String slotX, String Path, String slotY, String SecondFiller, Double SumOfSlotX, Double SlotX_Filler
+
+            Comparable: slotX, FirstFiller, path, slotY, SecondFiller
+            Partitioner: slotX
+
+
+            First Mapper
+            // <automobile> <nsubj> <start from> <pobj> <rest> 0 0 0 0
+            // <automobile> <nsubj>  *  *  *
+            // <rest> <pobj>  * * *
+            // *  <pobj>  *  *  *
+            // *  <nsubj>  *  *  *
+
+            First Reducer
+            // *  <nsubj>  *  *  * (sum)
+            // <automobile> <nsubj>  *  *  * (sum)
+            // <automobile> <nsubj> <start from> <pobj> <rest> (sum)
+            // *  <pobj>  *  *  * (sum)
+            // <rest> <pobj>  * * * (sum)
+            ....
+
+            -----------------------------------------------------------------------
+            Class SentenceTwo -
+            String FirstFiller, String slotX, String Path, String slotY, String SecondFiller, Double SumOfSlotX,
+                                        Double SlotX_Filler, Double SumOfSlotY, Double SlotY_Filler
+
+            Comparable: slotX, FirstFiller, path, slotY, SecondFiller
+            Partitioner: slotX
+
+
+            Second Mapper
+            // *  <nsubj>  *  *  * (sum)
+            // <automobile> <nsubj>  *  *  * (sum)
+            // <automobile> <nsubj> <start from> <pobj> <rest> <#nsubj> <#nsubj-automobile> 0 0
+
+            ...
+
+            Second Reducer:
+            <automobile> <nsubj> <start from> <pobj> <rest> <#nsubj> <#nsubj-automobile> <#pobj> <#pobj-rest>
+            fix_obj(obj); Just to make sure that slotX's value is bigger than slotY's value
+            context.write(obj)
+
+
+
+            --------------------------------------------------------------------------
+            Class SentenceThree -
+            Like SentenceTwo
+
+            Comparable: Path, slotX, slotY, firstfiller, secondFiller
+            Partioner: Path
+
+            Class Table -
+            Path, String slotX, String slotY, HashMap<String, double> fillerInX, HashMap<String, double> fillerInY
+
+            Third Mapper
+            // <automobile> <nsubj> <start from> <pobj> <rest> 5 7 8 9
+            // <word1> <nsubj> <start from> <pobj> <word4> 5 1 8 1
+            // <word2> <nsubj> <start from> <pobj> <word5> 5 10 8 1
+            // <word3> <nsubj> <start from> <pobj> <word6> 5 13 8 2
+            ....
+
+
+            Third Reducer
+            // Path: <start from>, SlotX: <nsubj>, SlotY: <pobj>, SlotXMap: {<automobile>: 7, <word1>: 1 ...}
+                                                                    SlotXMap: {<rest>: 9, <word4>: 1 ...}
+
+            // Re-calculate MiScore and upload to S3
+            // output MiScore
+             */

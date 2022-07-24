@@ -13,6 +13,12 @@ public class DoubleWritable3 implements WritableComparable<DoubleWritable3> {
         this.sumOfPath = new DoubleWritable(0);
     }
 
+    public DoubleWritable3(double slotX, double slotXFiller, double path){
+        this.sumOfSlotX = new DoubleWritable(slotX);
+        this.sumOfSlotX_Filler = new DoubleWritable(slotXFiller);
+        this.sumOfPath = new DoubleWritable(path);
+    }
+
     public DoubleWritable getSumOfSlotX() {
         return sumOfSlotX;
     }
@@ -41,7 +47,7 @@ public class DoubleWritable3 implements WritableComparable<DoubleWritable3> {
 
     @Override
     public String toString() {
-        	return String.format("%,.2f,%,.2f,%,.2f", sumOfSlotX, sumOfSlotX_Filler, sumOfPath);
+        	return String.format("%,.2f,%,.2f,%,.2f", sumOfSlotX.get(), sumOfSlotX_Filler.get(), sumOfPath.get());
     }
 
     @Override

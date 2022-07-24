@@ -14,8 +14,6 @@ public class SentenceOne implements WritableComparable<SentenceOne> {
     private Text path;
     private Text slotY;
     private Text secondFiller;
-    private DoubleWritable sumOfSlotX;
-    private DoubleWritable sumOfSlotX_Filler;
 
     public String getFirstFiller() {
         return firstFiller.toString();
@@ -57,40 +55,20 @@ public class SentenceOne implements WritableComparable<SentenceOne> {
         this.secondFiller = secondFiller;
     }
 
-    public Double getSumOfSlotX() {
-        return sumOfSlotX.get();
-    }
-
-    public void setSumOfSlotX(DoubleWritable sumOfSlotX) {
-        this.sumOfSlotX = sumOfSlotX;
-    }
-
-    public Double getSumOfSlotX_Filler() {
-        return sumOfSlotX_Filler.get();
-    }
-
-    public void setSumOfSlotX_Filler(DoubleWritable sumOfSlotX_Filler) {
-        this.sumOfSlotX_Filler = sumOfSlotX_Filler;
-    }
-
     SentenceOne(){
       this.firstFiller = new Text("");
       this.slotX = new Text("");
       this.path = new Text("");
       this.slotY = new Text("");
       this.secondFiller = new Text("");
-      this.sumOfSlotX = new DoubleWritable(0.);
-      this.sumOfSlotX_Filler = new DoubleWritable(0.);
     }
 
-    public SentenceOne(String firstFiller, String slotX, String path, String slotY, String secondFiller, double sumOfSlotX, double sumOfSlotX_Filler){
+    public SentenceOne(String firstFiller, String slotX, String path, String slotY, String secondFiller){
         this.firstFiller = new Text(firstFiller);
         this.slotX = new Text(slotX);
         this.path = new Text(path);
         this.slotY = new Text(slotY);
         this.secondFiller = new Text(secondFiller);
-        this.sumOfSlotX = new DoubleWritable(sumOfSlotX);
-        this.sumOfSlotX_Filler = new DoubleWritable(sumOfSlotX_Filler);
     }
 
 
@@ -114,7 +92,7 @@ public class SentenceOne implements WritableComparable<SentenceOne> {
 
     @Override
     public  String toString(){
-        return String.format("%s\t%s\t%s\t%s\t%s\t%,.2f\t%,.2f", getFirstFiller(), getSlotX(), getPath(), getSlotY(), getSecondFiller(), getSumOfSlotX(), getSumOfSlotX_Filler());
+        return String.format("%s,%s,%s,%s,%s", getFirstFiller(), getSlotX(), getPath(), getSlotY(), getSecondFiller());
     }
 
     @Override
@@ -124,8 +102,6 @@ public class SentenceOne implements WritableComparable<SentenceOne> {
         path.write(dataOutput);
         slotY.write(dataOutput);
         secondFiller.write(dataOutput);
-        sumOfSlotX.write(dataOutput);
-        sumOfSlotX_Filler.write(dataOutput);
     }
 
     @Override
@@ -135,7 +111,5 @@ public class SentenceOne implements WritableComparable<SentenceOne> {
         path.readFields(dataInput);
         slotY.readFields(dataInput);
         secondFiller.readFields(dataInput);
-        sumOfSlotX.readFields(dataInput);
-        sumOfSlotX_Filler.readFields(dataInput);
     }
 }

@@ -4,9 +4,7 @@
             /*
 
             Class SentenceOne -
-            String FirstFiller,
-            String slotX,
-            String Path,
+            String FirstFiller, String slotX, String Path,
             String slotY,
             String SecondFiller,
             Double SumOfSlotX,
@@ -22,6 +20,8 @@
             // <rest> <pobj>  * * *
             // *  <pobj>  *  *  *
             // *  <nsubj>  *  *  *
+
+            COMBINER
 
             First Reducer
             // *  <nsubj>  *  *  * (sum)
@@ -71,12 +71,15 @@
             Path, String slotX, String slotY, HashMap<String, double> fillerInX, HashMap<String, double> fillerInY
 
             Third Mapper
+
             // <automobile> <nsubj> <start from> <pobj> <rest> 5 7 8 9
             // <word1> <nsubj> <start from> <pobj> <word4> 5 1 8 1
             // <word2> <nsubj> <start from> <pobj> <word5> 5 10 8 1
             // <word3> <nsubj> <start from> <pobj> <word6> 5 13 8 2
             ....
+            context.write({PATH,SLOT,SLOTY}, {SLOTXMAP, SLOTYMAP})
 
+            COMBINER
 
             Third Reducer
             // Path: <start from>, SlotX: <nsubj>, SlotY: <pobj>, SlotXMap: {<automobile>: 7, <word1>: 1 ...}

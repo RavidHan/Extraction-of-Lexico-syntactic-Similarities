@@ -60,7 +60,7 @@ public class MapReducer1 {
     }
 
     public static class Mapper1
-            extends Mapper<Object, Text, SentenceOne, DoubleWritable> {
+            extends Mapper<Object, Text, SentenceOne, DoubleWritable3> {
 
         // start	automobile/NN/nsubj/2 start/VB/ROOT/0 from/IN/prep/2 rest/NN/pobj/3	10
 
@@ -105,47 +105,50 @@ public class MapReducer1 {
             if(lastWord.arcIndex == 0 || !lastWord.isNoun())
                 return;
 
-            DoubleWritable writableSum = new DoubleWritable(sum);
-            context.write(new SentenceOne(firstWord.word, slotX, path, slotY, lastWord.word, 0., 0.), writableSum);
-            context.write(new SentenceOne(firstWord.word, slotX, "*", "*", "*", 0., 0.), writableSum);
-            context.write(new SentenceOne(lastWord.word, slotY, "*", "*", "*", 0., 0.), writableSum);
-            context.write(new SentenceOne("*", slotY, "*", "*", "*", 0., 0.), writableSum);
-            context.write(new SentenceOne("*", slotX, "*", "*", "*", 0., 0.), writableSum);
+            DoubleWritable3 sums = new DoubleWritable3(0., 0., sum);
+            context.write(new SentenceOne(firstWord.word, slotX, path, slotY, lastWord.word), sums);
+            context.write(new SentenceOne(firstWord.word, slotX, "*", "*", "*"), sums);
+            context.write(new SentenceOne(lastWord.word, slotY, "*", "*", "*"), sums);
+            context.write(new SentenceOne("*", slotY, "*", "*", "*"), sums);
+            context.write(new SentenceOne("*", slotX, "*", "*", "*"), sums);
         }
     }
 
     public static class Reducer1
-            extends Reducer<SentenceOne, DoubleWritable, SentenceOne, DoubleWritable> {
+            extends Reducer<SentenceOne, DoubleWritable3, SentenceOne, DoubleWritable3> {
         private double slotX_sum = 0.;
         private double fillerX_sum = 0.;
         private String slotX = "";
         private String fillerX = "";
 
 
-        public void reduce(SentenceOne key, Iterable<DoubleWritable> values,
+        public void reduce(SentenceOne key, Iterable<DoubleWritable3> values,
                            Context context
         ) throws IOException, InterruptedException {
 
            double sum = 0;
-           for(DoubleWritable val : values)
-               sum += val.get();
+           double tempSlotX = 0;
+           double tempslotXFiller = 0;
+           for(DoubleWritable3 val : values) {
+               sum += val.getSumOfPath().get();
+               tempSlotX = val.getSumOfSlotX().get();
+               tempslotXFiller = val.getSumOfSlotX_Filler().get();
+           }
 
            if(key.getFirstFiller().equals("*")){
                slotX = key.getSlotX();
                slotX_sum = sum;
-               context.write(key, new DoubleWritable(sum));
+               context.write(key, new DoubleWritable3(tempSlotX, tempslotXFiller, sum));
                return;
            }
            if(key.getPath().equals("*")){
                fillerX = key.getFirstFiller();
                fillerX_sum = sum;
-               context.write(key, new DoubleWritable(sum));
+               context.write(key, new DoubleWritable3(tempSlotX, tempslotXFiller, sum));
                return;
            }
 
-           key.setSumOfSlotX(new DoubleWritable(slotX_sum));
-           key.setSumOfSlotX_Filler(new DoubleWritable(fillerX_sum));
-           context.write(key, new DoubleWritable(sum));
+           context.write(key, new DoubleWritable3(slotX_sum, fillerX_sum, sum));
         }
     }
 

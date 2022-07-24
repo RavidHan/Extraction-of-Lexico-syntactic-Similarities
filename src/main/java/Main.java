@@ -16,11 +16,11 @@ public class Main {
         job.setJarByClass(MapReducer1.class);
         job.setMapperClass(MapReducer1.Mapper1.class);
         job.setMapOutputKeyClass(SentenceOne.class);
-        job.setMapOutputValueClass(DoubleWritable.class);
+        job.setMapOutputValueClass(DoubleWritable3.class);
         job.setReducerClass(MapReducer1.Reducer1.class);
         job.setPartitionerClass(MapReducer1.SlotXPartitioner.class);
         job.setOutputKeyClass(SentenceOne.class);
-        job.setOutputValueClass(DoubleWritable.class);
+        job.setOutputValueClass(DoubleWritable3.class);
         FileInputFormat.addInputPath(job, new Path("input"));
         FileOutputFormat.setOutputPath(job, new Path("output_1"));
 

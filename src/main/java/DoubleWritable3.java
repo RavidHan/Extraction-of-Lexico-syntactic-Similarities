@@ -47,7 +47,7 @@ public class DoubleWritable3 implements WritableComparable<DoubleWritable3> {
 
     @Override
     public String toString() {
-        	return String.format("%,.2f,%,.2f,%,.2f", sumOfSlotX.get(), sumOfSlotX_Filler.get(), sumOfPath.get());
+        	return String.format("%.2f,%.2f,%.2f", sumOfSlotX.get(), sumOfSlotX_Filler.get(), sumOfPath.get());
     }
 
     @Override

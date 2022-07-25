@@ -63,7 +63,12 @@ public class DoubleWritable5 implements WritableComparable<DoubleWritable5> {
 
     @Override
     public String toString() {
-        	return String.format("%,.2f,%,.2f,%,.2f,%,.2f,%,.2f", sumOfSlotX, sumOfSlotX_Filler, sumOfSlotY, sumOfSlotY_Filler, sumOfPath);
+        	return String.format("%.2f,%.2f,%.2f,%.2f,%.2f",
+                    sumOfSlotX.get(),
+                    sumOfSlotX_Filler.get(),
+                    sumOfSlotY.get(),
+                    sumOfSlotY_Filler.get(),
+                    sumOfPath.get());
     }
 
     @Override

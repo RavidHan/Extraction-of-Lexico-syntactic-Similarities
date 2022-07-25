@@ -24,14 +24,31 @@ public class Main {
         FileInputFormat.addInputPath(job, new Path("input"));
         FileOutputFormat.setOutputPath(job, new Path("output_1"));
 
+        Job job2 = Job.getInstance(conf, "MapReduce2_SlotY");
+        job2.setJarByClass(MapReducer2.class);
+        job2.setMapperClass(MapReducer2.Mapper2.class);
+        job2.setMapOutputKeyClass(SentenceTwo.class);
+        job2.setMapOutputValueClass(DoubleWritable5.class);
+        job2.setReducerClass(MapReducer2.Reducer2.class);
+        job2.setCombinerClass(MapReducer2.Combiner.class);
+        job2.setPartitionerClass(MapReducer2.SlotYPartitioner.class);
+        job2.setOutputKeyClass(SentenceTwo.class);
+        job2.setOutputValueClass(DoubleWritable5.class);
+        FileInputFormat.addInputPath(job2, new Path("output_1"));
+        FileOutputFormat.setOutputPath(job2, new Path("output_2"));
+
 
 
         ControlledJob jobControl1 = new ControlledJob(job.getConfiguration());
         jobControl1.setJob(job);
 
+        ControlledJob jobControl2 = new ControlledJob(job.getConfiguration());
+        jobControl2.setJob(job2);
+        jobControl2.addDependingJob(jobControl1);
 
         JobControl jobControl = new JobControl("job-control");
         jobControl.addJob(jobControl1);
+        jobControl.addJob(jobControl2);
 
         Thread jobControlThread = new Thread(jobControl);
         jobControlThread.start();

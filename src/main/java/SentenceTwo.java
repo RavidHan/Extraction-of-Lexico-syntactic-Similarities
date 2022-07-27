@@ -92,7 +92,7 @@ public class SentenceTwo implements WritableComparable<SentenceTwo> {
 
     @Override
     public  String toString(){
-        return String.format("%s,%s.%s,%s,%s", getFirstFiller(), getSlotX(), getPath(), getSlotY(), getSecondFiller());
+        return String.format("%s,%s,%s,%s,%s", getFirstFiller(), getSlotX(), getPath(), getSlotY(), getSecondFiller());
     }
 
     @Override

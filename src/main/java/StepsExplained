@@ -88,3 +88,6 @@
             // Re-calculate MiScore and upload to S3
             // output MiScore
              */
+
+             for (key, (fillerX, slotX, path, slotY, fillerY)) in values:
+                updateXMap(key.fillerX, key.slotX

@@ -6,9 +6,25 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.json.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetUrlRequest;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
+
+import java.io.File;  // Import the File class
+import java.io.FileWriter;
+import java.io.IOException;  // Import the IOException class to handle errors
 
 import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 public class MapReducer3 {
@@ -78,6 +94,36 @@ public class MapReducer3 {
 
     public static class Reducer3
             extends Reducer<FinalSentence, SlotMaps, FinalSentence, SlotMaps> {
+        class S3Helper{
+            S3Client s3;
+            String bucketName;
+            public S3Helper(String bucketName){
+                Region region = Region.US_WEST_2;
+                s3 = S3Client.builder()
+                        .region(region)
+                        .build();
+                this.bucketName = bucketName;
+            }
+            public void writeToS3(JSONObject obj, String name){
+                try {
+                    PutObjectRequest putObjectRequest = PutObjectRequest
+                            .builder()
+                            .bucket(bucketName)
+                            .key("results/" + name)
+                            .build();
+                    s3.putObject(putObjectRequest,
+                            RequestBody.fromBytes(obj.toString().getBytes(StandardCharsets.UTF_8)));
+                }
+                catch (Exception e){
+                    System.out.println(e);
+                }
+            }
+        }
+
+        private S3Helper s3helper;
+        protected void setup(Reducer.Context context) throws IOException, InterruptedException {
+            s3helper = new S3Helper("liordia321");
+        }
 
         public void reduce(FinalSentence key, Iterable<SlotMaps> values,
                            Context context
@@ -133,6 +179,7 @@ public class MapReducer3 {
                 aggrSlotXTotal.put(firstFillerStr, aggrSlotXTotal.getOrDefault(firstFillerStr, 0.) + firstFiller);
                 aggrSlotYTotal.put(secondFillerStr, aggrSlotYTotal.getOrDefault(secondFillerStr, 0.) + secondFiller);
             }
+
             HashMap<String, Double> slotXFeatures = calculateFeatures(aggrSlotX, aggrSlotXTotal, slotXSum, accumulated_path);
             HashMap<String, Double> slotYFeatures = calculateFeatures(aggrSlotY, aggrSlotYTotal, slotYSum, accumulated_path);
 
@@ -142,8 +189,8 @@ public class MapReducer3 {
 
             // Now we just need to upload the features to S3
             JSONObject obj = new JSONObject(bothFeatures);
-
-
+            String keyName = "output/" + key.toString().replace(',','_') + ".json";
+            s3helper.writeToS3(obj, keyName);
         }
     }
 
@@ -167,4 +214,7 @@ public class MapReducer3 {
             return finalSentence.getSlotX().hashCode() % i;
         }
     }
+
+
+
 }

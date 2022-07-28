@@ -106,11 +106,11 @@ public class MapReducer1 {
                 return;
 
             DoubleWritable3 sums = new DoubleWritable3(0., 0., sum);
-            context.write(new SentenceOne(firstWord.word, slotX, path, slotY, lastWord.word), sums);
-            context.write(new SentenceOne(firstWord.word, slotX, "*", "*", "*"), sums);
-            context.write(new SentenceOne(lastWord.word, slotY, "*", "*", "*"), sums);
-            context.write(new SentenceOne("*", slotY, "*", "*", "*"), sums);
-            context.write(new SentenceOne("*", slotX, "*", "*", "*"), sums);
+            context.write(new SentenceOne(firstWord.word, "X", path, "Y", lastWord.word), sums);
+            context.write(new SentenceOne(firstWord.word, "X", "*", "*", "*"), sums);
+            context.write(new SentenceOne(lastWord.word, "Y", "*", "*", "*"), sums);
+            context.write(new SentenceOne("*", "Y", "*", "*", "*"), sums);
+            context.write(new SentenceOne("*", "X", "*", "*", "*"), sums);
         }
     }
 

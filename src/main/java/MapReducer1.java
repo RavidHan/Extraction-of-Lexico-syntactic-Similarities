@@ -23,8 +23,11 @@ class WordData{
 
     boolean isValidVerb(){
         String[] valid_verbs = {"VB", "VBD", "VBG", "VBN", "VBP", "VBZ"};
-        boolean value = Arrays.asList(valid_verbs).contains(this.POS);
-        return value;
+        String[] auxiliary_verbs = {"does", "do", "did", "be", "am", "is", "are",
+                "was", "were", "being", "been", "will", "would", "shall", "should", "may", "might", "must"};
+        boolean verb = Arrays.asList(valid_verbs).contains(this.POS);
+        boolean auxiliary = Arrays.asList(auxiliary_verbs).contains(this.word);
+        return verb && !auxiliary;
     }
 
     boolean isNoun(){

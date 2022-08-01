@@ -17,61 +17,61 @@ public class MapReducer2 {
 
         public void map(Object key, Text value, Context context
         ) throws IOException, InterruptedException {
-            if(value.toString().length() <= 1) // Sometimes the input is just byte 0.
-                return;
-
-            int index = 0;
-            int sum = 0;
-            StringTokenizer st = new StringTokenizer(value.toString(), "\t,");
-            SentenceTwo sentenceTwo = new SentenceTwo();
-            DoubleWritable5 doubleWritable5 = new DoubleWritable5();
-
-            while(st.hasMoreTokens()) {
-                String token = st.nextToken().replaceAll("[\\0000]", "");;
-                if (index == 0){
-                    sentenceTwo.setFirstFiller(new Text(token));
-                } else if (index == 1) {
-                    sentenceTwo.setSlotX(new Text(token));
-                } else if (index == 2) {
-                    sentenceTwo.setPath(new Text(token));
-                } else if (index == 3) {
-                    sentenceTwo.setSlotY(new Text(token));
-                } else if (index == 4){
-                    sentenceTwo.setSecondFiller(new Text(token));
-                } else {
-                    DoubleWritable val;
-                    try {
-                        val = new DoubleWritable(Double.parseDouble(token));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return;
-                    }
-                    if (index == 5) {
-                        if (!sentenceTwo.getPath().equals(star)) {
-                            doubleWritable5.setSumOfSlotX(val);
-                        }
-                    } else if (index == 6) {
-                        if (!sentenceTwo.getPath().equals(star)) {
-                            doubleWritable5.setSumOfSlotX_Filler(val);
-                        }
-                    } else if (index == 7) {
-                        if (!sentenceTwo.getPath().equals(star)) {
-                            doubleWritable5.setSumOfPath(val);
-                        } else {
-                            if (sentenceTwo.getFirstFiller().equals(star)) {
-                                doubleWritable5.setSumOfSlotX(val);
-                            } else {
-                                doubleWritable5.setSumOfSlotX_Filler(val);
-                            }
-                        }
-                        break;
-                    }
-                }
-                index++;
-            }
-
-            doubleWritable5 = sentenceTwo.adjustToReduce(doubleWritable5);
-            context.write(sentenceTwo, doubleWritable5);
+//            if(value.toString().length() <= 1) // Sometimes the input is just byte 0.
+//                return;
+//
+//            int index = 0;
+//            int sum = 0;
+//            StringTokenizer st = new StringTokenizer(value.toString(), "\t,");
+//            SentenceTwo sentenceTwo = new SentenceTwo();
+//            DoubleWritable5 doubleWritable5 = new DoubleWritable5();
+//
+//            while(st.hasMoreTokens()) {
+//                String token = st.nextToken().replaceAll("[\\0000]", "");;
+//                if (index == 0){
+//                    sentenceTwo.setFirstFiller(new Text(token));
+//                } else if (index == 1) {
+//                    sentenceTwo.setSlotX(new Text(token));
+//                } else if (index == 2) {
+//                    sentenceTwo.setPath(new Text(token));
+//                } else if (index == 3) {
+//                    sentenceTwo.setSlotY(new Text(token));
+//                } else if (index == 4){
+//                    sentenceTwo.setSecondFiller(new Text(token));
+//                } else {
+//                    DoubleWritable val;
+//                    try {
+//                        val = new DoubleWritable(Double.parseDouble(token));
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        return;
+//                    }
+//                    if (index == 5) {
+//                        if (!sentenceTwo.getPath().equals(star)) {
+//                            doubleWritable5.setSumOfSlotX(val);
+//                        }
+//                    } else if (index == 6) {
+//                        if (!sentenceTwo.getPath().equals(star)) {
+//                            doubleWritable5.setSumOfSlotX_Filler(val);
+//                        }
+//                    } else if (index == 7) {
+//                        if (!sentenceTwo.getPath().equals(star)) {
+//                            doubleWritable5.setSumOfPath(val);
+//                        } else {
+//                            if (sentenceTwo.getFirstFiller().equals(star)) {
+//                                doubleWritable5.setSumOfSlotX(val);
+//                            } else {
+//                                doubleWritable5.setSumOfSlotX_Filler(val);
+//                            }
+//                        }
+//                        break;
+//                    }
+//                }
+//                index++;
+//            }
+//
+//            doubleWritable5 = sentenceTwo.adjustToReduce(doubleWritable5);
+//            context.write(sentenceTwo, doubleWritable5);
         }
     }
 

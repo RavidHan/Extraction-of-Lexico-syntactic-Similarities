@@ -126,29 +126,29 @@ public class MapReducer1 {
                            Context context
         ) throws IOException, InterruptedException {
 
-           double sum = 0;
-           double tempSlotX = 0;
-           double tempslotXFiller = 0;
-           for(DoubleWritable3 val : values) {
-               sum += val.getSumOfPath().get();
-               tempSlotX = val.getSumOfSlotX().get();
-               tempslotXFiller = val.getSumOfSlotX_Filler().get();
-           }
+            double sum = 0;
+            double tempSlotX = 0;
+            double tempslotXFiller = 0;
+            for(DoubleWritable3 val : values) {
+                sum += val.getSumOfPath().get();
+                tempSlotX = val.getSumOfSlotX().get();
+                tempslotXFiller = val.getSumOfSlotX_Filler().get();
+            }
 
-           if(key.getFirstFiller().equals("*")){
-               slotX = key.getSlotX();
-               slotX_sum = sum;
-               context.write(key, new DoubleWritable3(tempSlotX, tempslotXFiller, sum));
-               return;
-           }
-           if(key.getPath().equals("*")){
-               fillerX = key.getFirstFiller();
-               fillerX_sum = sum;
-               context.write(key, new DoubleWritable3(tempSlotX, tempslotXFiller, sum));
-               return;
-           }
+            if(key.getFirstFiller().equals("*")){
+                slotX = key.getSlotX();
+                slotX_sum = sum;
+                context.write(key, new DoubleWritable3(tempSlotX, tempslotXFiller, sum));
+                return;
+            }
+            if(key.getPath().equals("*")){
+                fillerX = key.getFirstFiller();
+                fillerX_sum = sum;
+                context.write(key, new DoubleWritable3(tempSlotX, tempslotXFiller, sum));
+                return;
+            }
 
-           context.write(key, new DoubleWritable3(slotX_sum, fillerX_sum, sum));
+            context.write(key, new DoubleWritable3(slotX_sum, fillerX_sum, sum));
         }
     }
 

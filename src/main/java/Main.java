@@ -4,14 +4,21 @@ import org.apache.hadoop.hdfs.shortcircuit.ShortCircuitShm;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+
+import java.io.File;
 
 
 public class Main {
     public static void main(String[] args) throws Exception {
-
+        String bucketPath = "s3://diamlior321/";
+//        String bucketPath = "";
+        String inputPath = bucketPath + "input/";
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, "MapReduce1_SlotX");
         job.setJarByClass(MapReducer1.class);
@@ -22,8 +29,9 @@ public class Main {
         job.setPartitionerClass(MapReducer1.SlotXPartitioner.class);
         job.setOutputKeyClass(SentenceOne.class);
         job.setOutputValueClass(DoubleWritable3.class);
-        FileInputFormat.addInputPath(job, new Path("input"));
-        FileOutputFormat.setOutputPath(job, new Path("output_1"));
+//        job.setInputFormatClass(SequenceFileInputFormat.class);
+        FileInputFormat.addInputPath(job, new Path(inputPath));
+        FileOutputFormat.setOutputPath(job, new Path(bucketPath + "output_1"));
 
         Job job2 = Job.getInstance(conf, "MapReduce2_SlotY");
         job2.setJarByClass(MapReducer2.class);
@@ -35,8 +43,8 @@ public class Main {
         job2.setPartitionerClass(MapReducer2.SlotYPartitioner.class);
         job2.setOutputKeyClass(SentenceTwo.class);
         job2.setOutputValueClass(DoubleWritable5.class);
-        FileInputFormat.addInputPath(job2, new Path("output_1"));
-        FileOutputFormat.setOutputPath(job2, new Path("output_2"));
+        FileInputFormat.addInputPath(job2, new Path(bucketPath + "output_1"));
+        FileOutputFormat.setOutputPath(job2, new Path(bucketPath + "output_2"));
 
         Job job3 = Job.getInstance(conf, "MapReduce3_final");
         job3.setJarByClass(MapReducer3.class);
@@ -45,8 +53,8 @@ public class Main {
         job3.setMapOutputValueClass(SlotMaps.class);
         job3.setReducerClass(MapReducer3.Reducer3.class);
         job3.setPartitionerClass(MapReducer3.FinalPartitioner.class);
-        FileInputFormat.addInputPath(job3, new Path("output_2"));
-        FileOutputFormat.setOutputPath(job3, new Path("output_3"));
+        FileInputFormat.addInputPath(job3, new Path(bucketPath + "output_2"));
+        FileOutputFormat.setOutputPath(job3, new Path(bucketPath + "output_3"));
 
         ControlledJob jobControl1 = new ControlledJob(job.getConfiguration());
         jobControl1.setJob(job);

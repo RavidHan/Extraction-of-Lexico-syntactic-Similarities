@@ -122,7 +122,7 @@ public class MapReducer3 {
 
         private S3Helper s3helper;
         protected void setup(Reducer.Context context) throws IOException, InterruptedException {
-            s3helper = new S3Helper("liordia321");
+            s3helper = new S3Helper("diamlior321");
         }
 
         public void reduce(FinalSentence key, Iterable<SlotMaps> values,

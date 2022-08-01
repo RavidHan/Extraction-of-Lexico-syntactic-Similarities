@@ -16,7 +16,7 @@ class S3Helper{
         s3 = S3Client.builder()
                 .region(region)
                 .build();
-        this.bucketName = "thecoolbucketthatismine";
+        this.bucketName = "diamlior321";
     }
     public void writeToS3(JSONObject obj, String name){
         try {

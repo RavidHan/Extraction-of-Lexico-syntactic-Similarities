@@ -16,7 +16,8 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String bucketPath = "s3://diamlior321/";
+        S3Helper s3 = new S3Helper();
+        String bucketPath = "s3://" + s3.bucketName + "/";
 //        String bucketPath = "";
         String inputPath = bucketPath + "input/";
         Configuration conf = new Configuration();

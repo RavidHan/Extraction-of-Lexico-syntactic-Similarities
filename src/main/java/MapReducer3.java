@@ -94,35 +94,10 @@ public class MapReducer3 {
 
     public static class Reducer3
             extends Reducer<FinalSentence, SlotMaps, FinalSentence, SlotMaps> {
-        class S3Helper{
-            S3Client s3;
-            String bucketName;
-            public S3Helper(String bucketName){
-                Region region = Region.US_WEST_2;
-                s3 = S3Client.builder()
-                        .region(region)
-                        .build();
-                this.bucketName = bucketName;
-            }
-            public void writeToS3(JSONObject obj, String name){
-                try {
-                    PutObjectRequest putObjectRequest = PutObjectRequest
-                            .builder()
-                            .bucket(bucketName)
-                            .key("results/" + name)
-                            .build();
-                    s3.putObject(putObjectRequest,
-                            RequestBody.fromBytes(obj.toString().getBytes(StandardCharsets.UTF_8)));
-                }
-                catch (Exception e){
-                    System.out.println(e);
-                }
-            }
-        }
 
         private S3Helper s3helper;
         protected void setup(Reducer.Context context) throws IOException, InterruptedException {
-            s3helper = new S3Helper("diamlior321");
+            s3helper = new S3Helper();
         }
 
         public void reduce(FinalSentence key, Iterable<SlotMaps> values,

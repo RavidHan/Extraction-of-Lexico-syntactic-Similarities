@@ -1,6 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import org.apache.avro.data.Json;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -12,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -55,25 +57,16 @@ class SentenceParts{
     String fileName;
     LinkedTreeMap<String, Double> leftMap;
     LinkedTreeMap<String, Double> rightMap;
-
-    public InputStream getFile() {
-        Region region = Region.US_WEST_2;
-        S3Client s3 = S3Client.builder()
-                .region(region)
-                .build();
-        String location = "results/output/" + this.fileName;
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket("diamlior321").key(location).build();
-        return s3.getObject(getObjectRequest);
-    }
+    S3Helper s3Helper = new S3Helper();
 
     public SentenceParts(String s){
         path = s.substring(2, s.length() - 2);
         XIsFirst = (s.charAt(0) == 'X');
         fileName = "X_" + path + "_Y.json";
-        try (InputStream reader = getFile())
+        try (InputStream reader = s3Helper.getFile(fileName))
         {
             HashMap<String, Object> sentence1Map;
-            sentence1Map = new Gson().fromJson(String.valueOf(reader), HashMap.class);
+            sentence1Map = new Gson().fromJson(IOUtils.toString(reader, StandardCharsets.UTF_8), HashMap.class);
             if(XIsFirst){
                 leftMap = (LinkedTreeMap<String, Double>) sentence1Map.get("SlotX");
                 rightMap = (LinkedTreeMap<String, Double>) sentence1Map.get("SlotY");

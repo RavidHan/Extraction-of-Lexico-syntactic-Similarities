@@ -11,12 +11,12 @@ import java.nio.charset.StandardCharsets;
 class S3Helper{
     S3Client s3;
     String bucketName;
+    Region region = Region.US_EAST_1;
     public S3Helper(){
-        Region region = Region.US_WEST_2;
         s3 = S3Client.builder()
                 .region(region)
                 .build();
-        this.bucketName = "thecoolbucketthatismine";
+        this.bucketName = "collocation-ds";
     }
     public void writeToS3(JSONObject obj, String name){
         try {
@@ -34,9 +34,8 @@ class S3Helper{
     }
 
     public InputStream getFile(String fileName) {
-        Region region = Region.US_WEST_2;
         S3Client s3 = S3Client.builder()
-                .region(region)
+                .region(this.region)
                 .build();
         String location = "output/results/output/" + fileName;
         GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(bucketName).key(location).build();

@@ -155,9 +155,9 @@ public class MapReducer1 {
         }
     }
 
-    public static class SlotXPartitioner extends Partitioner<SentenceOne, DoubleWritable> {
+    public static class SlotXPartitioner extends Partitioner<SentenceOne, DoubleWritable3> {
         @Override
-        public int getPartition(SentenceOne sentenceOne, DoubleWritable doubleWritable, int i) {
+        public int getPartition(SentenceOne sentenceOne, DoubleWritable3 doubleWritable, int i) {
             return sentenceOne.getSlotX().hashCode() % i;
         }
     }

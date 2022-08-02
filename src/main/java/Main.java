@@ -22,8 +22,8 @@ public class Main {
         job.setPartitionerClass(MapReducer1.SlotXPartitioner.class);
         job.setOutputKeyClass(SentenceOne.class);
         job.setOutputValueClass(DoubleWritable3.class);
-        FileInputFormat.addInputPath(job, new Path("input"));
-        FileOutputFormat.setOutputPath(job, new Path("output_1"));
+        FileInputFormat.addInputPath(job, new Path("s3://collocation-ds/input"));
+        FileOutputFormat.setOutputPath(job, new Path("s3://collocation-ds/output_1"));
 
         Job job2 = Job.getInstance(conf, "MapReduce2_SlotY");
         job2.setJarByClass(MapReducer2.class);
@@ -35,8 +35,8 @@ public class Main {
         job2.setPartitionerClass(MapReducer2.SlotYPartitioner.class);
         job2.setOutputKeyClass(SentenceTwo.class);
         job2.setOutputValueClass(DoubleWritable5.class);
-        FileInputFormat.addInputPath(job2, new Path("output_1"));
-        FileOutputFormat.setOutputPath(job2, new Path("output_2"));
+        FileInputFormat.addInputPath(job2, new Path("s3://collocation-ds/output_1"));
+        FileOutputFormat.setOutputPath(job2, new Path("s3://collocation-ds/output_2"));
 
         Job job3 = Job.getInstance(conf, "MapReduce3_final");
         job3.setJarByClass(MapReducer3.class);
@@ -45,8 +45,8 @@ public class Main {
         job3.setMapOutputValueClass(SlotMaps.class);
         job3.setReducerClass(MapReducer3.Reducer3.class);
         job3.setPartitionerClass(MapReducer3.FinalPartitioner.class);
-        FileInputFormat.addInputPath(job3, new Path("output_2"));
-        FileOutputFormat.setOutputPath(job3, new Path("output_3"));
+        FileInputFormat.addInputPath(job3, new Path("s3://collocation-ds/output_2"));
+        FileOutputFormat.setOutputPath(job3, new Path("s3://collocation-ds/output_3"));
 
         ControlledJob jobControl1 = new ControlledJob(job.getConfiguration());
         jobControl1.setJob(job);

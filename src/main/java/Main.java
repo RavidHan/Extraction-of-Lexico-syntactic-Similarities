@@ -4,7 +4,9 @@ import org.apache.hadoop.hdfs.shortcircuit.ShortCircuitShm;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -16,10 +18,12 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+        if (args.length < 1) {
+            System.out.println("Please choose 'big' or 'small'");
+            System.exit(0);
+        }
         S3Helper s3 = new S3Helper();
         String bucketPath = "s3://" + s3.bucketName + "/";
-//        String bucketPath = "";
-        String inputPath = bucketPath + "input/";
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, "MapReduce1_SlotX");
         job.setJarByClass(MapReducer1.class);
@@ -30,8 +34,15 @@ public class Main {
         job.setPartitionerClass(MapReducer1.SlotXPartitioner.class);
         job.setOutputKeyClass(SentenceOne.class);
         job.setOutputValueClass(DoubleWritable3.class);
-//        job.setInputFormatClass(SequenceFileInputFormat.class);
-        FileInputFormat.addInputPath(job, new Path(inputPath));
+        MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput1"), TextInputFormat.class, MapReducer1.Mapper1.class);
+
+        if(args[0].equals("big")){
+            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput2"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput3"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput4"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput5"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput6"), TextInputFormat.class, MapReducer1.Mapper1.class);
+        }
         FileOutputFormat.setOutputPath(job, new Path(bucketPath + "output_1"));
 
         Job job2 = Job.getInstance(conf, "MapReduce2_SlotY");

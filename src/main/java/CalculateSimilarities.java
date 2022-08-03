@@ -8,11 +8,9 @@ import org.json.simple.parser.JSONParser;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,12 +18,31 @@ import java.util.Set;
 
 public class CalculateSimilarities {
     public static void main(String[] args) throws Exception {
-        SentenceParts sentence1 = new SentenceParts("X start on Y");
-        SentenceParts sentence2 = new SentenceParts("X start to Y");
-        double leftSim = calculateSlotSim(sentence1.leftMap, sentence2.leftMap);
-        double rightSim = calculateSlotSim(sentence1.rightMap, sentence2.rightMap);
-        double result = Math.sqrt(leftSim * rightSim);
-        System.out.println(result);
+        S3Helper s3Helper = new S3Helper();
+        HashMap<String, Double> sentencesSimMap = new HashMap<>();
+        File file = new File("input.txt");
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        PrintWriter writer = new PrintWriter("output.txt", "UTF-8");
+        String st;
+
+        System.out.println("Starting to calculate similarities, it might take a while...");
+
+        while ((st = br.readLine()) != null) {
+            String[] sents = st.split("\t");
+            SentenceParts sentence1 = new SentenceParts(sents[0], s3Helper);
+            SentenceParts sentence2 = new SentenceParts(sents[1], s3Helper);
+            double result = 0;
+            if (!sentence1.failed() && !sentence2.failed()) {
+                double leftSim = calculateSlotSim(sentence1.leftMap, sentence2.leftMap);
+                double rightSim = calculateSlotSim(sentence1.rightMap, sentence2.rightMap);
+                result = Math.sqrt(leftSim * rightSim);
+            }
+            writer.println(st + "\t" + result);
+        }
+
+        writer.close();
+
+        System.out.println("Finished calculating!");
     }
 
     public static double calculateSlotSim(LinkedTreeMap<String, Double> first, LinkedTreeMap<String, Double> second){
@@ -57,9 +74,12 @@ class SentenceParts{
     String fileName;
     LinkedTreeMap<String, Double> leftMap;
     LinkedTreeMap<String, Double> rightMap;
-    S3Helper s3Helper = new S3Helper();
 
-    public SentenceParts(String s){
+    public boolean failed(){
+        return leftMap == null;
+    }
+
+    public SentenceParts(String s, S3Helper s3Helper){
         path = s.substring(2, s.length() - 2);
         XIsFirst = (s.charAt(0) == 'X');
         fileName = "X_" + path + "_Y.json";
@@ -75,10 +95,9 @@ class SentenceParts{
                 leftMap = (LinkedTreeMap<String, Double>) sentence1Map.get("SlotY");
                 rightMap = (LinkedTreeMap<String, Double>) sentence1Map.get("SlotX");
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | NoSuchKeyException e) {
+            leftMap = null;
+            rightMap = null;
         }
     }
 }

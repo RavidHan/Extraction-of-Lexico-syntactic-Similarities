@@ -3,6 +3,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.InputStream;
@@ -16,7 +17,7 @@ class S3Helper{
         s3 = S3Client.builder()
                 .region(region)
                 .build();
-        this.bucketName = "diamlior321";
+        this.bucketName = "collocation-ds";
     }
     public void writeToS3(JSONObject obj, String name){
         try {
@@ -33,7 +34,7 @@ class S3Helper{
         }
     }
 
-    public InputStream getFile(String fileName) {
+    public InputStream getFile(String fileName) throws NoSuchKeyException {
         S3Client s3 = S3Client.builder()
                 .region(this.region)
                 .build();

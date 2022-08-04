@@ -140,9 +140,9 @@ public class MapReducer2 {
             try {
                 num = Integer.parseInt(sentenceTwo.getSecondFiller());
             } catch (Exception e) {
-                num = sentenceTwo.getSecondFiller().hashCode();
+                num = sentenceTwo.getFirstFiller().hashCode();
             }
-            return num % i;
+            return Math.abs(num % i);
         }
     }
 }

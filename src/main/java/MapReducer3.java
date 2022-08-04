@@ -89,6 +89,8 @@ public class MapReducer3 {
                 for (Writable v : slotXMap.keySet()) {
                     Text tempText = (Text) v;
                     String tempString = tempText.toString();
+                    if(tempString.contains("_SLOTX"))
+                        continue;
                     slotXSum += ((DoubleWritable) slotXMap.get(tempText)).get();
                     tempX = ((DoubleWritable) slotXMap.get(v)).get();
                     maps_output.addToSlotX(v.toString(), tempX + slotXSum);
@@ -96,6 +98,8 @@ public class MapReducer3 {
                 for (Writable v : slotYMap.keySet()) {
                     Text tempText = (Text) v;
                     String tempString = tempText.toString();
+                    if(tempString.contains("_SLOTY"))
+                        continue;
                     slotXSum += ((DoubleWritable) slotYMap.get(tempText)).get();
                     tempX = ((DoubleWritable) slotYMap.get(v)).get();
                     maps_output.addToSlotY(v.toString(), tempX + slotXSum);

@@ -5,22 +5,13 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class DoubleWritable3 implements WritableComparable<DoubleWritable3> {
+public class DoubleWritable4 implements WritableComparable<DoubleWritable4> {
 
-    public DoubleWritable3() {
-        this.sumOfSlotX = new DoubleWritable(0);
+    public DoubleWritable4() {
         this.sumOfSlotX_Filler = new DoubleWritable(0);
         this.sumOfPath = new DoubleWritable(0);
-        this.sumOfSlotY = new DoubleWritable(0);
         this.sumOfSlotY_Filler = new DoubleWritable(0);
-    }
-
-    public DoubleWritable getSumOfSlotX() {
-        return sumOfSlotX;
-    }
-
-    public void setSumOfSlotX(DoubleWritable sumOfSlotX) {
-        this.sumOfSlotX = sumOfSlotX;
+        this.sumOfAll = new DoubleWritable(0);
     }
 
     public DoubleWritable getSumOfSlotX_Filler() {
@@ -31,14 +22,6 @@ public class DoubleWritable3 implements WritableComparable<DoubleWritable3> {
         this.sumOfSlotX_Filler = sumOfSlotX_Filler;
     }
 
-    public DoubleWritable getSumOfSlotY() {
-        return sumOfSlotY;
-    }
-
-    public void setSumOfSlotY(DoubleWritable sumOfSlotY) {
-        this.sumOfSlotY = sumOfSlotY;
-    }
-
     public DoubleWritable getSumOfSlotY_Filler() {
         return sumOfSlotY_Filler;
     }
@@ -47,51 +30,54 @@ public class DoubleWritable3 implements WritableComparable<DoubleWritable3> {
         this.sumOfSlotY_Filler = sumOfSlotY_Filler;
     }
 
-    private DoubleWritable sumOfSlotX;
+    private DoubleWritable sumOfAll;
     private DoubleWritable sumOfSlotX_Filler;
-    private DoubleWritable sumOfSlotY;
     private DoubleWritable sumOfSlotY_Filler;
     private DoubleWritable sumOfPath;
 
-    public DoubleWritable3(DoubleWritable sumOfSlotX, DoubleWritable sumOfSlotX_filler, DoubleWritable sumOfSlotY, DoubleWritable sumOfSlotY_filler, DoubleWritable sumOfPath) {
-        this.sumOfSlotX = sumOfSlotX;
-        sumOfSlotX_Filler = sumOfSlotX_filler;
-        this.sumOfSlotY = sumOfSlotY;
-        sumOfSlotY_Filler = sumOfSlotY_filler;
+    public DoubleWritable getSumOfAll() {
+        return sumOfAll;
+    }
+
+    public void setSumOfAll(DoubleWritable sumOfAll) {
+        this.sumOfAll = sumOfAll;
+    }
+
+    public DoubleWritable4(DoubleWritable sumOfSlotX_filler, DoubleWritable sumOfSlotY_filler, DoubleWritable sumOfPath, DoubleWritable sumOfAll) {
+        this.sumOfAll = sumOfAll;
+        this.sumOfSlotX_Filler = sumOfSlotX_filler;
+        this.sumOfSlotY_Filler = sumOfSlotY_filler;
         this.sumOfPath = sumOfPath;
     }
 
     @Override
     public String toString() {
-        	return String.format("%.2f,%.2f,%.2f,%.2f,%.2f",
-                    sumOfSlotX.get(),
+        	return String.format("%.2f,%.2f,%.2f,%.2f",
                     sumOfSlotX_Filler.get(),
-                    sumOfSlotY.get(),
                     sumOfSlotY_Filler.get(),
-                    sumOfPath.get());
+                    sumOfPath.get(),
+                    sumOfAll.get());
     }
 
     @Override
-    public int compareTo(DoubleWritable3 o) {
+    public int compareTo(DoubleWritable4 o) {
         return 0;
     }
 
     @Override
     public void write(DataOutput dataOutput) throws IOException {
-        sumOfSlotX.write(dataOutput);
         sumOfSlotX_Filler.write(dataOutput);
-        sumOfSlotY.write(dataOutput);
         sumOfSlotY_Filler.write(dataOutput);
         sumOfPath.write(dataOutput);
+        sumOfAll.write(dataOutput);
     }
 
     @Override
     public void readFields(DataInput dataInput) throws IOException {
-        sumOfSlotX.readFields(dataInput);
         sumOfSlotX_Filler.readFields(dataInput);
-        sumOfSlotY.readFields(dataInput);
         sumOfSlotY_Filler.readFields(dataInput);
         sumOfPath.readFields(dataInput);
+        sumOfAll.readFields(dataInput);
     }
 
     public DoubleWritable getSumOfPath() {

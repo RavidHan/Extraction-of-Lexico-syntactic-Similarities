@@ -82,7 +82,7 @@ class SentenceParts{
     public SentenceParts(String s, S3Helper s3Helper){
         path = s.substring(2, s.length() - 2);
         XIsFirst = (s.charAt(0) == 'X');
-        fileName = "X_" + path + "_Y.json";
+        fileName = path + ".json";
         try (InputStream reader = s3Helper.getFile(fileName))
         {
             HashMap<String, Object> sentence1Map;

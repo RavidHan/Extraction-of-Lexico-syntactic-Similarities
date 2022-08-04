@@ -59,6 +59,10 @@ public class MapReducer2 {
                     context.write(sentenceTwo, doubleWritable2);
                 }
             } else {
+                if (sentenceTwo.getSecondFiller().equals(star)){
+                    sentenceTwo.setSecondFiller(new Text(sentenceTwo.getFirstFiller()));
+                    sentenceTwo.setFirstFiller(new Text(star));
+                }
                 context.write(sentenceTwo, doubleWritable2);
             }
         }
@@ -140,7 +144,7 @@ public class MapReducer2 {
             try {
                 num = Integer.parseInt(sentenceTwo.getSecondFiller());
             } catch (Exception e) {
-                num = sentenceTwo.getFirstFiller().hashCode();
+                num = sentenceTwo.getSecondFiller().hashCode();
             }
             return Math.abs(num % i);
         }

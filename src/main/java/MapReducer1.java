@@ -154,7 +154,7 @@ public class MapReducer1 {
     public static class SlotXPartitioner extends Partitioner<SentenceOneX, DoubleWritable2> {
         @Override
         public int getPartition(SentenceOneX sentenceOne, DoubleWritable2 doubleWritable, int i) {
-            return sentenceOne.getFirstFiller().hashCode() % i;
+            return Math.abs(sentenceOne.getFirstFiller().hashCode() % i);
         }
     }
 }

@@ -173,7 +173,7 @@ public class MapReducer3 {
     public static class FinalPartitioner extends Partitioner<Text, SlotMaps> {
         @Override
         public int getPartition(Text path, SlotMaps maps, int i) {
-            return path.toString().hashCode() % i;
+            return Math.abs(path.toString().hashCode() % i);
         }
     }
 

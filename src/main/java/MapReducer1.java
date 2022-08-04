@@ -1,4 +1,3 @@
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
@@ -63,7 +62,7 @@ public class MapReducer1 {
     }
 
     public static class Mapper1
-            extends Mapper<Object, Text, SentenceOne, DoubleWritable3> {
+            extends Mapper<Object, Text, SentenceOneX, DoubleWritable2> {
 
         // start	automobile/NN/nsubj/2 start/VB/ROOT/0 from/IN/prep/2 rest/NN/pobj/3	10
 
@@ -108,57 +107,51 @@ public class MapReducer1 {
             if(lastWord.arcIndex == 0 || !lastWord.isNoun())
                 return;
 
-            DoubleWritable3 sums = new DoubleWritable3(0., 0., sum);
-            context.write(new SentenceOne(firstWord.word, "X", path, "Y", lastWord.word), sums);
-            context.write(new SentenceOne(firstWord.word, "X", "*", "*", "*"), sums);
-            context.write(new SentenceOne(lastWord.word, "Y", "*", "*", "*"), sums);
-            context.write(new SentenceOne("*", "Y", "*", "*", "*"), sums);
-            context.write(new SentenceOne("*", "X", "*", "*", "*"), sums);
+            DoubleWritable2 sums = new DoubleWritable2(0., sum);
+            context.write(new SentenceOneX(firstWord.word, path, lastWord.word), sums);
+            context.write(new SentenceOneX(firstWord.word, "X", "*"), sums);
+            context.write(new SentenceOneX(lastWord.word, "Y", "*"), sums);
+            context.write(new SentenceOneX("*", "*", "*"), sums);
         }
     }
 
     public static class Reducer1
-            extends Reducer<SentenceOne, DoubleWritable3, SentenceOne, DoubleWritable3> {
-        private double slotX_sum = 0.;
+            extends Reducer<SentenceOneX, DoubleWritable2, SentenceOneX, DoubleWritable2> {
         private double fillerX_sum = 0.;
-        private String slotX = "";
-        private String fillerX = "";
+        private static String fillerX = "";
 
 
-        public void reduce(SentenceOne key, Iterable<DoubleWritable3> values,
+        public void reduce(SentenceOneX key, Iterable<DoubleWritable2> values,
                            Context context
         ) throws IOException, InterruptedException {
 
             double sum = 0;
             double tempSlotX = 0;
             double tempslotXFiller = 0;
-            for(DoubleWritable3 val : values) {
+            for(DoubleWritable2 val : values) {
                 sum += val.getSumOfPath().get();
-                tempSlotX = val.getSumOfSlotX().get();
                 tempslotXFiller = val.getSumOfSlotX_Filler().get();
             }
 
-            if(key.getFirstFiller().equals("*")){
-                slotX = key.getSlotX();
-                slotX_sum = sum;
-                context.write(key, new DoubleWritable3(tempSlotX, tempslotXFiller, sum));
-                return;
-            }
-            if(key.getPath().equals("*")){
+
+            if(key.getPath().equals("X")){
                 fillerX = key.getFirstFiller();
                 fillerX_sum = sum;
-                context.write(key, new DoubleWritable3(tempSlotX, tempslotXFiller, sum));
+                context.write(key, new DoubleWritable2(tempslotXFiller, sum));
                 return;
             }
-
-            context.write(key, new DoubleWritable3(slotX_sum, fillerX_sum, sum));
+            if(key.getPath().equals("Y") || key.getPath().equals("*")){
+                context.write(key, new DoubleWritable2(0., sum));
+                return;
+            }
+            context.write(key, new DoubleWritable2(fillerX_sum, sum));
         }
     }
 
-    public static class SlotXPartitioner extends Partitioner<SentenceOne, DoubleWritable3> {
+    public static class SlotXPartitioner extends Partitioner<SentenceOneX, DoubleWritable2> {
         @Override
-        public int getPartition(SentenceOne sentenceOne, DoubleWritable3 doubleWritable, int i) {
-            return sentenceOne.getSlotX().hashCode() % i;
+        public int getPartition(SentenceOneX sentenceOne, DoubleWritable2 doubleWritable, int i) {
+            return sentenceOne.getFirstFiller().hashCode() % i;
         }
     }
 }

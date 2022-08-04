@@ -11,12 +11,8 @@ public class DoubleWritable3 implements WritableComparable<DoubleWritable3> {
         this.sumOfSlotX = new DoubleWritable(0);
         this.sumOfSlotX_Filler = new DoubleWritable(0);
         this.sumOfPath = new DoubleWritable(0);
-    }
-
-    public DoubleWritable3(double slotX, double slotXFiller, double path){
-        this.sumOfSlotX = new DoubleWritable(slotX);
-        this.sumOfSlotX_Filler = new DoubleWritable(slotXFiller);
-        this.sumOfPath = new DoubleWritable(path);
+        this.sumOfSlotY = new DoubleWritable(0);
+        this.sumOfSlotY_Filler = new DoubleWritable(0);
     }
 
     public DoubleWritable getSumOfSlotX() {
@@ -35,19 +31,44 @@ public class DoubleWritable3 implements WritableComparable<DoubleWritable3> {
         this.sumOfSlotX_Filler = sumOfSlotX_Filler;
     }
 
+    public DoubleWritable getSumOfSlotY() {
+        return sumOfSlotY;
+    }
+
+    public void setSumOfSlotY(DoubleWritable sumOfSlotY) {
+        this.sumOfSlotY = sumOfSlotY;
+    }
+
+    public DoubleWritable getSumOfSlotY_Filler() {
+        return sumOfSlotY_Filler;
+    }
+
+    public void setSumOfSlotY_Filler(DoubleWritable sumOfSlotY_Filler) {
+        this.sumOfSlotY_Filler = sumOfSlotY_Filler;
+    }
+
     private DoubleWritable sumOfSlotX;
     private DoubleWritable sumOfSlotX_Filler;
+    private DoubleWritable sumOfSlotY;
+    private DoubleWritable sumOfSlotY_Filler;
     private DoubleWritable sumOfPath;
 
-    public DoubleWritable3(DoubleWritable sumOfSlotX, DoubleWritable sumOfSlotX_filler, DoubleWritable sumOfPath) {
+    public DoubleWritable3(DoubleWritable sumOfSlotX, DoubleWritable sumOfSlotX_filler, DoubleWritable sumOfSlotY, DoubleWritable sumOfSlotY_filler, DoubleWritable sumOfPath) {
         this.sumOfSlotX = sumOfSlotX;
         sumOfSlotX_Filler = sumOfSlotX_filler;
+        this.sumOfSlotY = sumOfSlotY;
+        sumOfSlotY_Filler = sumOfSlotY_filler;
         this.sumOfPath = sumOfPath;
     }
 
     @Override
     public String toString() {
-        	return String.format("%.2f,%.2f,%.2f", sumOfSlotX.get(), sumOfSlotX_Filler.get(), sumOfPath.get());
+        	return String.format("%.2f,%.2f,%.2f,%.2f,%.2f",
+                    sumOfSlotX.get(),
+                    sumOfSlotX_Filler.get(),
+                    sumOfSlotY.get(),
+                    sumOfSlotY_Filler.get(),
+                    sumOfPath.get());
     }
 
     @Override
@@ -59,6 +80,8 @@ public class DoubleWritable3 implements WritableComparable<DoubleWritable3> {
     public void write(DataOutput dataOutput) throws IOException {
         sumOfSlotX.write(dataOutput);
         sumOfSlotX_Filler.write(dataOutput);
+        sumOfSlotY.write(dataOutput);
+        sumOfSlotY_Filler.write(dataOutput);
         sumOfPath.write(dataOutput);
     }
 
@@ -66,6 +89,8 @@ public class DoubleWritable3 implements WritableComparable<DoubleWritable3> {
     public void readFields(DataInput dataInput) throws IOException {
         sumOfSlotX.readFields(dataInput);
         sumOfSlotX_Filler.readFields(dataInput);
+        sumOfSlotY.readFields(dataInput);
+        sumOfSlotY_Filler.readFields(dataInput);
         sumOfPath.readFields(dataInput);
     }
 

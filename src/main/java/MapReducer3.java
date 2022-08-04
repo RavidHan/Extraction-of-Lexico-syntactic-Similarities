@@ -186,7 +186,7 @@ public class MapReducer3 {
     public static class FinalPartitioner extends Partitioner<FinalSentence, SlotMaps> {
         @Override
         public int getPartition(FinalSentence finalSentence, SlotMaps maps, int i) {
-            return finalSentence.getSlotX().hashCode() % i;
+            return finalSentence.getPath().hashCode() % i;
         }
     }
 

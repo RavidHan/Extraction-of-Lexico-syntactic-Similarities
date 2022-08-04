@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
 public class MapReducer2 {
 
     public static class Mapper2
-            extends Mapper<Object, Text, SentenceTwo, DoubleWritable5> {
+            extends Mapper<Object, Text, SentenceTwo, DoubleWritable3> {
 
         // automobile,nsubj,start from,rest,pobj	10,5,3
         private static final String star = "*";
@@ -24,7 +24,7 @@ public class MapReducer2 {
             int sum = 0;
             StringTokenizer st = new StringTokenizer(value.toString(), "\t,");
             SentenceTwo sentenceTwo = new SentenceTwo();
-            DoubleWritable5 doubleWritable5 = new DoubleWritable5();
+            DoubleWritable3 doubleWritable3 = new DoubleWritable3();
 
             while(st.hasMoreTokens()) {
                 String token = st.nextToken().replaceAll("[\\0000]", "");;
@@ -48,20 +48,20 @@ public class MapReducer2 {
                     }
                     if (index == 5) {
                         if (!sentenceTwo.getPath().equals(star)) {
-                            doubleWritable5.setSumOfSlotX(val);
+                            doubleWritable3.setSumOfSlotX(val);
                         }
                     } else if (index == 6) {
                         if (!sentenceTwo.getPath().equals(star)) {
-                            doubleWritable5.setSumOfSlotX_Filler(val);
+                            doubleWritable3.setSumOfSlotX_Filler(val);
                         }
                     } else if (index == 7) {
                         if (!sentenceTwo.getPath().equals(star)) {
-                            doubleWritable5.setSumOfPath(val);
+                            doubleWritable3.setSumOfPath(val);
                         } else {
                             if (sentenceTwo.getFirstFiller().equals(star)) {
-                                doubleWritable5.setSumOfSlotX(val);
+                                doubleWritable3.setSumOfSlotX(val);
                             } else {
-                                doubleWritable5.setSumOfSlotX_Filler(val);
+                                doubleWritable3.setSumOfSlotX_Filler(val);
                             }
                         }
                         break;
@@ -70,57 +70,57 @@ public class MapReducer2 {
                 index++;
             }
 
-            doubleWritable5 = sentenceTwo.adjustToReduce(doubleWritable5);
-            context.write(sentenceTwo, doubleWritable5);
+            doubleWritable3 = sentenceTwo.adjustToReduce(doubleWritable3);
+            context.write(sentenceTwo, doubleWritable3);
         }
     }
 
-    public static class Combiner extends Reducer<SentenceTwo, DoubleWritable5, SentenceTwo,DoubleWritable5> {
-        public void reduce(SentenceTwo key, Iterable<DoubleWritable5> values,
+    public static class Combiner extends Reducer<SentenceTwo, DoubleWritable3, SentenceTwo, DoubleWritable3> {
+        public void reduce(SentenceTwo key, Iterable<DoubleWritable3> values,
                            Context context
         ) throws IOException, InterruptedException {
             double sum = 0;
             DoubleWritable slotySum = new DoubleWritable(0);
             DoubleWritable fillerySum = new DoubleWritable(0);
-            DoubleWritable5 doubleWritable5 = new DoubleWritable5();
+            DoubleWritable3 doubleWritable3 = new DoubleWritable3();
             if(key.getFirstFiller().equals("*")) {
-                for (DoubleWritable5 val : values)
+                for (DoubleWritable3 val : values)
                     sum += val.getSumOfSlotX().get();
 
-                doubleWritable5.setSumOfSlotX(new DoubleWritable(sum));
-                context.write(key, doubleWritable5);
+                doubleWritable3.setSumOfSlotX(new DoubleWritable(sum));
+                context.write(key, doubleWritable3);
                 return;
             }
 
             if(key.getPath().equals("*")){
-                for(DoubleWritable5 val : values)
+                for(DoubleWritable3 val : values)
                     sum += val.getSumOfSlotX_Filler().get();
-                doubleWritable5.setSumOfSlotX_Filler(new DoubleWritable(sum));
-                context.write(key, doubleWritable5);
+                doubleWritable3.setSumOfSlotX_Filler(new DoubleWritable(sum));
+                context.write(key, doubleWritable3);
                 return;
             }
 
-            for(DoubleWritable5 val : values) {
+            for(DoubleWritable3 val : values) {
                 sum += val.getSumOfPath().get();
                 fillerySum = val.getSumOfSlotY_Filler();
                 slotySum = val.getSumOfSlotY();
             }
-            doubleWritable5.setSumOfPath(new DoubleWritable(sum));
-            doubleWritable5.setSumOfSlotY(slotySum);
-            doubleWritable5.setSumOfSlotY_Filler(fillerySum);
-            context.write(key, doubleWritable5);
+            doubleWritable3.setSumOfPath(new DoubleWritable(sum));
+            doubleWritable3.setSumOfSlotY(slotySum);
+            doubleWritable3.setSumOfSlotY_Filler(fillerySum);
+            context.write(key, doubleWritable3);
         }
     }
 
     public static class Reducer2
-            extends Reducer<SentenceTwo, DoubleWritable5, SentenceTwo, DoubleWritable5> {
+            extends Reducer<SentenceTwo, DoubleWritable3, SentenceTwo, DoubleWritable3> {
         private double slotX_sum = 0.;
         private double fillerX_sum = 0.;
         private String slotX = "";
         private String fillerX = "";
 
 
-        public void reduce(SentenceTwo key, Iterable<DoubleWritable5> values,
+        public void reduce(SentenceTwo key, Iterable<DoubleWritable3> values,
                            Context context
         ) throws IOException, InterruptedException {
 
@@ -130,7 +130,7 @@ public class MapReducer2 {
 
             if(key.getFirstFiller().equals("*")){
                 slotX = key.getSlotX();
-                for(DoubleWritable5 val : values)
+                for(DoubleWritable3 val : values)
                     sum += val.getSumOfSlotX().get();
                 slotX_sum = sum;
                 return;
@@ -138,19 +138,19 @@ public class MapReducer2 {
 
             if(key.getPath().equals("*")){
                 fillerX = key.getFirstFiller();
-                for(DoubleWritable5 val : values)
+                for(DoubleWritable3 val : values)
                     sum += val.getSumOfSlotX_Filler().get();
                 fillerX_sum = sum;
                 return;
             }
 
-            for(DoubleWritable5 val : values) {
+            for(DoubleWritable3 val : values) {
                 sum += val.getSumOfPath().get();
                 sumSlotY = val.getSumOfSlotY();
                 sumSecondFiller = val.getSumOfSlotY_Filler();
             }
 
-            DoubleWritable5 value = new DoubleWritable5(sumSlotY, sumSecondFiller,
+            DoubleWritable3 value = new DoubleWritable3(sumSlotY, sumSecondFiller,
                     new DoubleWritable(slotX_sum),
                     new DoubleWritable(fillerX_sum),
                     new DoubleWritable(sum));
@@ -159,9 +159,9 @@ public class MapReducer2 {
         }
     }
 
-    public static class SlotYPartitioner extends Partitioner<SentenceTwo, DoubleWritable5> {
+    public static class SlotYPartitioner extends Partitioner<SentenceTwo, DoubleWritable3> {
         @Override
-        public int getPartition(SentenceTwo sentenceTwo, DoubleWritable5 doubleWritable, int i) {
+        public int getPartition(SentenceTwo sentenceTwo, DoubleWritable3 doubleWritable, int i) {
             return sentenceTwo.getSlotX().hashCode() % i;
         }
     }

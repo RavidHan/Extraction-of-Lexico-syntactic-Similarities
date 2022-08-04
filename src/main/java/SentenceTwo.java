@@ -1,7 +1,5 @@
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.junit.platform.commons.annotation.Testable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -113,9 +111,9 @@ public class SentenceTwo implements WritableComparable<SentenceTwo> {
         secondFiller.readFields(dataInput);
     }
 
-    public DoubleWritable5 adjustToReduce(DoubleWritable5 doubleWritable5) {
+    public DoubleWritable3 adjustToReduce(DoubleWritable3 doubleWritable3) {
         if (this.path.equals(new Text("*"))) {
-            return doubleWritable5;
+            return doubleWritable3;
         } else {
             Text slotXTemp = slotX;
             Text slotX_FillerTemp = this.firstFiller;
@@ -123,11 +121,11 @@ public class SentenceTwo implements WritableComparable<SentenceTwo> {
             this.firstFiller = this.secondFiller;
             this.slotY = slotXTemp;
             this.secondFiller = slotX_FillerTemp;
-            return new DoubleWritable5(doubleWritable5.getSumOfSlotY(),
-                    doubleWritable5.getSumOfSlotY_Filler(),
-                    doubleWritable5.getSumOfSlotX(),
-                    doubleWritable5.getSumOfSlotX_Filler(),
-                    doubleWritable5.getSumOfPath());
+            return new DoubleWritable3(doubleWritable3.getSumOfSlotY(),
+                    doubleWritable3.getSumOfSlotY_Filler(),
+                    doubleWritable3.getSumOfSlotX(),
+                    doubleWritable3.getSumOfSlotX_Filler(),
+                    doubleWritable3.getSumOfPath());
         }
     }
 

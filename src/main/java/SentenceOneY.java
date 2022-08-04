@@ -1,18 +1,14 @@
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Arrays;
 
-public class SentenceOne implements WritableComparable<SentenceOne> {
+public class SentenceOneY implements WritableComparable<SentenceOneY> {
 
     private Text firstFiller;
-    private Text slotX;
     private Text path;
-    private Text slotY;
     private Text secondFiller;
 
     public String getFirstFiller() {
@@ -23,28 +19,12 @@ public class SentenceOne implements WritableComparable<SentenceOne> {
         this.firstFiller = firstFiller;
     }
 
-    public String getSlotX() {
-        return slotX.toString();
-    }
-
-    public void setSlotX(Text slotX) {
-        this.slotX = slotX;
-    }
-
     public String getPath() {
         return path.toString();
     }
 
     public void setPath(Text path) {
         this.path = path;
-    }
-
-    public String getSlotY() {
-        return slotY.toString();
-    }
-
-    public void setSlotY(Text slotY) {
-        this.slotY = slotY;
     }
 
     public String  getSecondFiller() {
@@ -55,34 +35,29 @@ public class SentenceOne implements WritableComparable<SentenceOne> {
         this.secondFiller = secondFiller;
     }
 
-    SentenceOne(){
+    SentenceOneY(){
       this.firstFiller = new Text("");
-      this.slotX = new Text("");
       this.path = new Text("");
-      this.slotY = new Text("");
       this.secondFiller = new Text("");
     }
 
-    public SentenceOne(String firstFiller, String slotX, String path, String slotY, String secondFiller){
+    public SentenceOneY(String firstFiller, String path, String secondFiller){
         this.firstFiller = new Text(firstFiller);
-        this.slotX = new Text(slotX);
         this.path = new Text(path);
-        this.slotY = new Text(slotY);
         this.secondFiller = new Text(secondFiller);
     }
 
 
     @Override
-    public int compareTo(SentenceOne o) {
-        int ret = getSlotX().compareTo(o.getSlotX());
+    public int compareTo(SentenceOneY o) {
+        int ret = getFirstFiller().compareTo(o.getFirstFiller());
         if (ret == 0){
-            ret = getFirstFiller().compareTo(o.getFirstFiller());
-        }
-        if (ret == 0){
-            ret = getPath().compareTo(o.getPath());
-        }
-        if (ret == 0){
-            ret = getSlotY().compareTo(o.getSlotY());
+            if(getPath().equals("Y"))
+                ret -= 1;
+            if(o.getPath().equals("Y"))
+                ret += 1;
+            if(ret == 0)
+                ret = getPath().compareTo(o.getPath());
         }
         if (ret == 0){
             ret = getSecondFiller().compareTo(o.getSecondFiller());
@@ -92,24 +67,20 @@ public class SentenceOne implements WritableComparable<SentenceOne> {
 
     @Override
     public  String toString(){
-        return String.format("%s,%s,%s,%s,%s", getFirstFiller(), getSlotX(), getPath(), getSlotY(), getSecondFiller());
+        return String.format("%s,%s,%s", getFirstFiller(), getPath(), getSecondFiller());
     }
 
     @Override
     public void write(DataOutput dataOutput) throws IOException {
         firstFiller.write(dataOutput);
-        slotX.write(dataOutput);
         path.write(dataOutput);
-        slotY.write(dataOutput);
         secondFiller.write(dataOutput);
     }
 
     @Override
     public void readFields(DataInput dataInput) throws IOException {
         firstFiller.readFields(dataInput);
-        slotX.readFields(dataInput);
         path.readFields(dataInput);
-        slotY.readFields(dataInput);
         secondFiller.readFields(dataInput);
     }
 }

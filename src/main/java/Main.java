@@ -1,60 +1,50 @@
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.shortcircuit.ShortCircuitShm;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
-
-import java.io.File;
 
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        if (args.length < 1) {
-            System.out.println("Please choose 'big' or 'small'");
-            System.exit(0);
-        }
         S3Helper s3 = new S3Helper();
-        String bucketPath = "s3://" + s3.bucketName + "/";
+//        String bucketPath = "s3://" + s3.bucketName + "/";
+        String bucketPath = "output";
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, "MapReduce1_SlotX");
         job.setJarByClass(MapReducer1.class);
         job.setMapperClass(MapReducer1.Mapper1.class);
-        job.setMapOutputKeyClass(SentenceOne.class);
-        job.setMapOutputValueClass(DoubleWritable3.class);
+        job.setMapOutputKeyClass(SentenceOneX.class);
+        job.setMapOutputValueClass(DoubleWritable2.class);
         job.setReducerClass(MapReducer1.Reducer1.class);
         job.setPartitionerClass(MapReducer1.SlotXPartitioner.class);
-        job.setOutputKeyClass(SentenceOne.class);
-        job.setOutputValueClass(DoubleWritable3.class);
-        MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput1"), TextInputFormat.class, MapReducer1.Mapper1.class);
+        job.setOutputKeyClass(SentenceOneX.class);
+        job.setOutputValueClass(DoubleWritable2.class);
+        MultipleInputs.addInputPath(job,new Path("input"), TextInputFormat.class, MapReducer1.Mapper1.class);
 
-        if(args[0].equals("big")){
-            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput2"), TextInputFormat.class, MapReducer1.Mapper1.class);
-            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput3"), TextInputFormat.class, MapReducer1.Mapper1.class);
-            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput4"), TextInputFormat.class, MapReducer1.Mapper1.class);
-            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput5"), TextInputFormat.class, MapReducer1.Mapper1.class);
-            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput6"), TextInputFormat.class, MapReducer1.Mapper1.class);
-        }
+//        if(args.length > 0 && args[0].equals("big")){
+//            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput2"), TextInputFormat.class, MapReducer1.Mapper1.class);
+//            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput3"), TextInputFormat.class, MapReducer1.Mapper1.class);
+//            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput4"), TextInputFormat.class, MapReducer1.Mapper1.class);
+//            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput5"), TextInputFormat.class, MapReducer1.Mapper1.class);
+//            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput6"), TextInputFormat.class, MapReducer1.Mapper1.class);
+//        }
         FileOutputFormat.setOutputPath(job, new Path(bucketPath + "output_1"));
 
         Job job2 = Job.getInstance(conf, "MapReduce2_SlotY");
         job2.setJarByClass(MapReducer2.class);
         job2.setMapperClass(MapReducer2.Mapper2.class);
         job2.setMapOutputKeyClass(SentenceTwo.class);
-        job2.setMapOutputValueClass(DoubleWritable5.class);
+        job2.setMapOutputValueClass(DoubleWritable3.class);
         job2.setReducerClass(MapReducer2.Reducer2.class);
         job2.setCombinerClass(MapReducer2.Combiner.class);
         job2.setPartitionerClass(MapReducer2.SlotYPartitioner.class);
         job2.setOutputKeyClass(SentenceTwo.class);
-        job2.setOutputValueClass(DoubleWritable5.class);
+        job2.setOutputValueClass(DoubleWritable3.class);
         FileInputFormat.addInputPath(job2, new Path(bucketPath + "output_1"));
         FileOutputFormat.setOutputPath(job2, new Path(bucketPath + "output_2"));
 

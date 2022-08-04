@@ -35,7 +35,6 @@ public class Main {
             MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput6"), TextInputFormat.class, MapReducer1.Mapper1.class);
         }
         FileOutputFormat.setOutputPath(job, new Path(bucketPath + "output_1"));
-        FileOutputFormat.setOutputPath(job, new Path("output_1"));
 
         Job job2 = Job.getInstance(conf, "MapReduce2_SlotY");
         job2.setJarByClass(MapReducer2.class);

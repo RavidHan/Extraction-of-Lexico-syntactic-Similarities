@@ -137,7 +137,6 @@ public class MapReducer1 {
             if(key.getPath().equals("X")){
                 fillerX = key.getFirstFiller();
                 fillerX_sum = sum;
-                context.write(key, new DoubleWritable2(tempslotXFiller, sum));
                 return;
             }
             if(key.getPath().equals("Y") || key.getPath().equals("*")){

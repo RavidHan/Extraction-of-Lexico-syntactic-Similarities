@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
 public class MapReducer2 {
 
     public static class Mapper2
-            extends Mapper<Object, Text, SentenceOneY, DoubleWritable2> {
+            extends Mapper<Object, Text, SentenceOneY, DoubleWritable3> {
 
         // automobile,start from,rest	10,3
         private static final String star = "*";
@@ -23,7 +23,7 @@ public class MapReducer2 {
             int index = 0;
             StringTokenizer st = new StringTokenizer(value.toString(), "\t,");
             SentenceOneY sentenceTwo = new SentenceOneY();
-            DoubleWritable2 doubleWritable2 = new DoubleWritable2();
+            DoubleWritable3 doubleWritable3 = new DoubleWritable3();
 
             while(st.hasMoreTokens()) {
                 String token = st.nextToken().replaceAll("[\\0000]", "");;
@@ -43,108 +43,80 @@ public class MapReducer2 {
                     }
                     if (index == 3) {
                         if (!sentenceTwo.getSecondFiller().equals(star)) {
-                            doubleWritable2.setSumOfSlotX_Filler(val);
+                            doubleWritable3.setSumOfSlotX_Filler(val);
                         }
                     } else if (index == 4) {
-                        doubleWritable2.setSumOfPath(val);
+                        doubleWritable3.setSumOfPath(val);
                         break;
                     }
                 }
                 index++;
             }
+            context.write(sentenceTwo, doubleWritable3);
 
-            if (sentenceTwo.getFirstFiller().equals(star)){
-                for (int i=0; i<20; i++) {
-                    sentenceTwo.setSecondFiller(new Text(Integer.toString(i)));
-                    context.write(sentenceTwo, doubleWritable2);
-                }
-            } else {
-                if (sentenceTwo.getSecondFiller().equals(star)){
-                    sentenceTwo.setSecondFiller(new Text(sentenceTwo.getFirstFiller()));
-                    sentenceTwo.setFirstFiller(new Text(star));
-                }
-                context.write(sentenceTwo, doubleWritable2);
-            }
+//            if (sentenceTwo.getFirstFiller().equals(star)){
+//                for (int i=0; i<20; i++) {
+//                    sentenceTwo.setSecondFiller(new Text(Integer.toString(i)));
+//                    context.write(sentenceTwo, doubleWritable2);
+//                }
+//            } else {
+//                if (sentenceTwo.getSecondFiller().equals(star)){
+//                    sentenceTwo.setSecondFiller(new Text(sentenceTwo.getFirstFiller()));
+//                    sentenceTwo.setFirstFiller(new Text(star));
+//                }
+//                context.write(sentenceTwo, doubleWritable2);
+//            }
         }
     }
 
     public static class Reducer2
-            extends Reducer<SentenceOneY, DoubleWritable2, SentenceOneY, DoubleWritable4> {
-        private DoubleWritable all_sum = new DoubleWritable(0);
-        private DoubleWritable fillerY_sum = new DoubleWritable(0);
+            extends Reducer<SentenceOneY, DoubleWritable3, SentenceOneY, DoubleWritable3> {
+        private double fillerY_sum = 0.;
 
 
-        public void reduce(SentenceOneY key, Iterable<DoubleWritable2> values,
+        public void reduce(SentenceOneY key, Iterable<DoubleWritable3> values,
                            Context context
         ) throws IOException, InterruptedException {
 
             double sum = 0;
 
-            if (key.getPath().equals("*")){
-                for (DoubleWritable2 d:
-                     values)
-                    all_sum = d.getSumOfPath();
-                return;
-            }
+//            if (key.getPath().equals("*")){
+//                for (DoubleWritable2 d:
+//                     values)
+//                    all_sum = d.getSumOfPath();
+//                return;
+//            }
 
             if (key.getPath().equals("Y")) {
-                for (DoubleWritable2 d:
+                for (DoubleWritable3 d:
                      values)
-                    fillerY_sum = d.getSumOfPath();
+                    fillerY_sum = d.getSumOfPath().get();
                 return;
             }
 
-            DoubleWritable4 doubleWritable4 = new DoubleWritable4();
-            doubleWritable4.setSumOfSlotY_Filler(fillerY_sum);
-            doubleWritable4.setSumOfAll(all_sum);
-            for (DoubleWritable2 d:
+            DoubleWritable3 doubleWritable3 = new DoubleWritable3();
+            doubleWritable3.setSumOfSlotY_Filler(new DoubleWritable(fillerY_sum));
+            for (DoubleWritable3 d:
                  values) {
-                doubleWritable4.setSumOfSlotX_Filler(d.getSumOfSlotX_Filler());
-                doubleWritable4.setSumOfPath(d.getSumOfPath());
+                doubleWritable3.setSumOfSlotX_Filler(d.getSumOfSlotX_Filler());
+                doubleWritable3.setSumOfPath(d.getSumOfPath());
             }
+            String firstFiller = key.getFirstFiller();
+            key.setFirstFiller(new Text(key.getSecondFiller()));
+            key.setSecondFiller(new Text(firstFiller));
+            context.write(key, doubleWritable3);
 
-            context.write(key, doubleWritable4);
-
-
-//            if(key.getFirstFiller().equals("*")){
-//                slotX = key.getSlotX();
-//                for(DoubleWritable4 val : values)
-//                    sum += val.getSumOfSlotX().get();
-//                slotX_sum = sum;
-//                return;
-//            }
-//
-//            if(key.getPath().equals("*")){
-//                fillerX = key.getFirstFiller();
-//                for(DoubleWritable4 val : values)
-//                    sum += val.getSumOfSlotX_Filler().get();
-//                fillerX_sum = sum;
-//                return;
-//            }
-//
-//            for(DoubleWritable4 val : values) {
-//                sum += val.getSumOfPath().get();
-//                sumSlotY = val.getSumOfSlotY();
-//                sumSecondFiller = val.getSumOfSlotY_Filler();
-//            }
-//
-//            DoubleWritable4 value = new DoubleWritable4(sumSlotY, sumSecondFiller,
-//                    new DoubleWritable(slotX_sum),
-//                    new DoubleWritable(fillerX_sum),
-//                    new DoubleWritable(sum));
-//            key.adjustToEnd();
-//            context.write(key, value);
         }
     }
 
-    public static class SlotYPartitioner extends Partitioner<SentenceOneY, DoubleWritable2> {
+    public static class SlotYPartitioner extends Partitioner<SentenceOneY, DoubleWritable3> {
         @Override
-        public int getPartition(SentenceOneY sentenceTwo, DoubleWritable2 doubleWritable, int i) {
+        public int getPartition(SentenceOneY sentenceTwo, DoubleWritable3 doubleWritable, int i) {
             int num;
             try {
                 num = Integer.parseInt(sentenceTwo.getSecondFiller());
             } catch (Exception e) {
-                num = sentenceTwo.getSecondFiller().hashCode();
+                num = sentenceTwo.getFirstFiller().hashCode();
             }
             return Math.abs(num % i);
         }

@@ -98,8 +98,6 @@ public class MapReducer1 {
 
             WordData firstWord = wordArray.getFirst();
             WordData lastWord = wordArray.getLast();
-            String slotX = firstWord.dependency;
-            String slotY = lastWord.dependency;
             String path = getPathFromWordArray(wordArray);
 
             if(firstWord.arcIndex == 0 || !firstWord.isNoun())
@@ -127,10 +125,8 @@ public class MapReducer1 {
 
             double sum = 0;
             double tempSlotX = 0;
-            double tempslotXFiller = 0;
             for(DoubleWritable2 val : values) {
                 sum += val.getSumOfPath().get();
-                tempslotXFiller = val.getSumOfSlotX_Filler().get();
             }
 
 
@@ -139,10 +135,18 @@ public class MapReducer1 {
                 fillerX_sum = sum;
                 return;
             }
-            if(key.getPath().equals("Y") || key.getPath().equals("*")){
+            else if(key.getPath().equals("Y") || key.getPath().equals("*")){
                 context.write(key, new DoubleWritable2(0., sum));
                 return;
             }
+            else if (!key.getFirstFiller().equals(fillerX)){
+                System.out.println("Something went wrong!");
+                return;
+            }
+
+            String firstfiller = key.getFirstFiller();
+            key.setFirstFiller(new Text(key.getSecondFiller()));
+            key.setSecondFiller(new Text(firstfiller));
             context.write(key, new DoubleWritable2(fillerX_sum, sum));
         }
     }

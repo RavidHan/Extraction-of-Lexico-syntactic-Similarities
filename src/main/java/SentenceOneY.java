@@ -50,17 +50,9 @@ public class SentenceOneY implements WritableComparable<SentenceOneY> {
 
     @Override
     public int compareTo(SentenceOneY o) {
-        int ret = getSecondFiller().compareTo(o.getSecondFiller());
+        int ret = firstFiller.toString().compareTo(o.firstFiller.toString());
         if (ret == 0){
-            if(getPath().equals("Y"))
-                ret -= 1;
-            if(o.getPath().equals("Y"))
-                ret += 1;
-            if(ret == 0)
-                ret = getPath().compareTo(o.getPath());
-        }
-        if (ret == 0){
-            ret = getFirstFiller().compareTo(o.getFirstFiller());
+            ret = getSecondFiller().compareTo(o.getSecondFiller());
         }
         return ret;
     }

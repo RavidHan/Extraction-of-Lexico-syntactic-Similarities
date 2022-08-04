@@ -5,46 +5,28 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.json.*;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetUrlRequest;
-import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
 
-import java.io.File;  // Import the File class
-import java.io.FileWriter;
 import java.io.IOException;  // Import the IOException class to handle errors
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 public class MapReducer3 {
-
+    private static final String star = "*";
     public static class Mapper3
-            extends Mapper<Object, Text, FinalSentence, SlotMaps> {
+            extends Mapper<Object, Text, Text, SlotMaps> {
 
         public void map(Object key, Text value, Context context
         ) throws IOException, InterruptedException {
             int index = 0;
-            int sum = 0;
             StringTokenizer st = new StringTokenizer(value.toString(), "\t,");
-            FinalSentence sentence = new FinalSentence();
+            Text path = new Text("");
             SlotMaps maps = new SlotMaps();
             String firstFiller = "";
             String secondFiller = "";
             double firstFillerSum = 0.;
             double secondFillerSum = 0.;
-            double slotXSum = 0.;
-            double slotYSum = 0.;
             double pathSum = 0.;
             while (st.hasMoreTokens()) {
                 String token = st.nextToken().replaceAll("[\\0000]", "");
@@ -53,54 +35,49 @@ public class MapReducer3 {
                         firstFiller = token;
                         break;
                     case 1:
-                        sentence.setSlotX(new Text(token));
+                        path.set(new Text(token));
                         break;
                     case 2:
-                        sentence.setPath(new Text(token));
-                        break;
-                    case 3:
-                        sentence.setSlotY(new Text(token));
-                        break;
-                    case 4:
                         secondFiller = token;
                         break;
-                    case 5:
-                        slotXSum = Double.parseDouble(token);
-                        break;
-                    case 6:
+                    case 3:
                         firstFillerSum = Double.parseDouble(token);
                         break;
-                    case 7:
-                        slotYSum = Double.parseDouble(token);
-                        break;
-                    case 8:
-                        secondFillerSum = Double.parseDouble(token);
-                        break;
-                    case 9:
+                    case 4:
                         pathSum = Double.parseDouble(token);
+                        break;
+                    case 5:
+                        secondFillerSum = Double.parseDouble(token);
                         break;
                 }
                 index++;
             }
+            if(path.toString().equals("*")) {
+                maps.addToSlotX("*", pathSum);
+                for (int i=0; i<20; i++) {
+                    context.write(new Text(Integer.toString(i)), maps);
+                }
+                return;
+            }
+
             maps.addToSlotX(firstFiller, pathSum); // Amount of the first filler in this path
             maps.addToSlotX(firstFiller + "_SLOTX", firstFillerSum); // Amount of the first filler in all sentences
-            maps.addToSlotX("*", slotXSum); // Amount of slotX in all sentences
             maps.addToSlotY(secondFiller, pathSum); // Amount of the first filler in this path
             maps.addToSlotY(secondFiller + "_SLOTY", secondFillerSum); // Amount of the second filler in all sentences
-            maps.addToSlotY("*", slotYSum); // Amount of slotY in all sentences
-            context.write(sentence, maps);
+            context.write(path, maps);
         }
     }
 
     public static class Reducer3
-            extends Reducer<FinalSentence, SlotMaps, FinalSentence, SlotMaps> {
+            extends Reducer<Text, SlotMaps, Text, SlotMaps> {
 
         private S3Helper s3helper;
+        private double sum = 0;
         protected void setup(Reducer.Context context) throws IOException, InterruptedException {
             s3helper = new S3Helper();
         }
 
-        public void reduce(FinalSentence key, Iterable<SlotMaps> values,
+        public void reduce(Text key, Iterable<SlotMaps> values,
                            Context context
         ) throws IOException, InterruptedException {
             String firstFillerStr = "";
@@ -133,6 +110,13 @@ public class MapReducer3 {
                         path = ((DoubleWritable) slotXMap.get(tempText)).get();
                     }
                 }
+                try{
+                    sum = ((DoubleWritable)slotXMap.get(new Text("*"))).get();
+                    return;
+                }
+                catch(Exception ignored){
+
+                }
                 for(Writable v : slotYMap.keySet()){
                     Text tempText = (Text)v;
                     String tempString = tempText.toString();
@@ -155,8 +139,11 @@ public class MapReducer3 {
                 aggrSlotYTotal.put(secondFillerStr, aggrSlotYTotal.getOrDefault(secondFillerStr, 0.) + secondFiller);
             }
 
-            HashMap<String, Double> slotXFeatures = calculateFeatures(aggrSlotX, aggrSlotXTotal, slotXSum, accumulated_path);
-            HashMap<String, Double> slotYFeatures = calculateFeatures(aggrSlotY, aggrSlotYTotal, slotYSum, accumulated_path);
+            if(sum < 1){
+                System.out.println();
+            }
+            HashMap<String, Double> slotXFeatures = calculateFeatures(aggrSlotX, aggrSlotXTotal, sum/2, accumulated_path);
+            HashMap<String, Double> slotYFeatures = calculateFeatures(aggrSlotY, aggrSlotYTotal, sum/2, accumulated_path);
 
             HashMap<String, HashMap<String, Double>> bothFeatures = new HashMap<>();
             bothFeatures.put("SlotX", slotXFeatures);
@@ -183,10 +170,10 @@ public class MapReducer3 {
         return map;
     }
 
-    public static class FinalPartitioner extends Partitioner<FinalSentence, SlotMaps> {
+    public static class FinalPartitioner extends Partitioner<Text, SlotMaps> {
         @Override
-        public int getPartition(FinalSentence finalSentence, SlotMaps maps, int i) {
-            return finalSentence.getPath().hashCode() % i;
+        public int getPartition(Text path, SlotMaps maps, int i) {
+            return path.toString().hashCode() % i;
         }
     }
 

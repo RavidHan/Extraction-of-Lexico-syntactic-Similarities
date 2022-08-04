@@ -37,8 +37,7 @@ class S3Helper{
         S3Client s3 = S3Client.builder()
                 .region(this.region)
                 .build();
-        String location = "output/results/output/" + fileName;
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(bucketName).key(location).build();
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder().bucket(bucketName).key(fileName).build();
         return s3.getObject(getObjectRequest);
     }
 }

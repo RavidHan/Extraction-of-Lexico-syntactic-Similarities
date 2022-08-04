@@ -34,10 +34,13 @@ public class CalculateSimilarities {
             double result = 0;
             if (!sentence1.failed() && !sentence2.failed()) {
                 double leftSim = calculateSlotSim(sentence1.leftMap, sentence2.leftMap);
+                System.out.println("left sim " + leftSim);
                 double rightSim = calculateSlotSim(sentence1.rightMap, sentence2.rightMap);
+                System.out.println("right sim " + rightSim);
                 result = Math.sqrt(leftSim * rightSim);
             }
             writer.println(st + "\t" + result);
+            System.out.println(st + "\t" + result);
         }
 
         writer.close();
@@ -69,6 +72,7 @@ public class CalculateSimilarities {
 
 
 class SentenceParts{
+    String lib = "big/output/results/output/";
     String path;
     boolean XIsFirst;
     String fileName;
@@ -82,7 +86,7 @@ class SentenceParts{
     public SentenceParts(String s, S3Helper s3Helper){
         path = s.substring(2, s.length() - 2);
         XIsFirst = (s.charAt(0) == 'X');
-        fileName = path + ".json";
+        fileName = lib + path + ".json";
         try (InputStream reader = s3Helper.getFile(fileName))
         {
             HashMap<String, Object> sentence1Map;
@@ -95,9 +99,11 @@ class SentenceParts{
                 leftMap = (LinkedTreeMap<String, Double>) sentence1Map.get("SlotY");
                 rightMap = (LinkedTreeMap<String, Double>) sentence1Map.get("SlotX");
             }
+            System.out.println("found " + path);
         } catch (IOException | NoSuchKeyException e) {
             leftMap = null;
             rightMap = null;
+            System.out.println("not found " + path);
         }
     }
 }

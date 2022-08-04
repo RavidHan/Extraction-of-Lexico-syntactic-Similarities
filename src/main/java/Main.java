@@ -14,7 +14,6 @@ public class Main {
     public static void main(String[] args) throws Exception {
         S3Helper s3 = new S3Helper();
         String bucketPath = "s3://" + s3.bucketName + "/";
-//        String bucketPath = "output";
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, "MapReduce1_SlotX");
         job.setJarByClass(MapReducer1.class);
@@ -23,16 +22,21 @@ public class Main {
         job.setMapOutputValueClass(DoubleWritable2.class);
         job.setReducerClass(MapReducer1.Reducer1.class);
         job.setPartitionerClass(MapReducer1.SlotXPartitioner.class);
+        job.setCombinerClass(MapReducer1.Reducer1.class);
         job.setOutputKeyClass(SentenceOneX.class);
         job.setOutputValueClass(DoubleWritable2.class);
-        MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput1"), TextInputFormat.class, MapReducer1.Mapper1.class);
+        MultipleInputs.addInputPath(job, new Path("s3://hannadirtproject/projectinput/DIRTinput1"), TextInputFormat.class, MapReducer1.Mapper1.class);
 
-        if(args.length > 0 && args[0].equals("big")){
-            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput2"), TextInputFormat.class, MapReducer1.Mapper1.class);
-            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput3"), TextInputFormat.class, MapReducer1.Mapper1.class);
-            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput4"), TextInputFormat.class, MapReducer1.Mapper1.class);
-            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput5"), TextInputFormat.class, MapReducer1.Mapper1.class);
-            MultipleInputs.addInputPath(job,new Path("s3://hannadirtproject/projectinput/DIRTinput6"), TextInputFormat.class, MapReducer1.Mapper1.class);
+        if (args.length > 0 && args[0].equals("big")) {
+            bucketPath += "big/";
+            MultipleInputs.addInputPath(job, new Path("s3://hannadirtproject/projectinput/DIRTinput2"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job, new Path("s3://hannadirtproject/projectinput/DIRTinput3"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job, new Path("s3://hannadirtproject/projectinput/DIRTinput4"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job, new Path("s3://hannadirtproject/projectinput/DIRTinput5"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job, new Path("s3://hannadirtproject/projectinput/DIRTinput6"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job, new Path("s3://hannadirtproject/projectinput/DIRTinput7"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job, new Path("s3://hannadirtproject/projectinput/DIRTinput8"), TextInputFormat.class, MapReducer1.Mapper1.class);
+            MultipleInputs.addInputPath(job, new Path("s3://hannadirtproject/projectinput/DIRTinput9"), TextInputFormat.class, MapReducer1.Mapper1.class);
         }
         FileOutputFormat.setOutputPath(job, new Path(bucketPath + "output_1"));
 
@@ -45,7 +49,6 @@ public class Main {
         job2.setPartitionerClass(MapReducer2.SlotYPartitioner.class);
         job2.setOutputKeyClass(SentenceOneY.class);
         job2.setOutputValueClass(DoubleWritable3.class);
-//        job2.setNumReduceTasks(9);
         FileInputFormat.addInputPath(job2, new Path(bucketPath + "output_1"));
         FileOutputFormat.setOutputPath(job2, new Path(bucketPath + "output_2"));
 
@@ -55,23 +58,19 @@ public class Main {
         job3.setMapOutputKeyClass(Text.class);
         job3.setMapOutputValueClass(SlotMaps.class);
         job3.setReducerClass(MapReducer3.Reducer3.class);
+        job3.setCombinerClass(MapReducer3.Combiner3.class);
         job3.setPartitionerClass(MapReducer3.FinalPartitioner.class);
         FileInputFormat.addInputPath(job3, new Path(bucketPath + "output_2"));
         FileOutputFormat.setOutputPath(job3, new Path(bucketPath + "output_3"));
 
-        ControlledJob jobControl1 = new ControlledJob(job.getConfiguration());
-        jobControl1.setJob(job);
-
         ControlledJob jobControl2 = new ControlledJob(job.getConfiguration());
         jobControl2.setJob(job2);
-        jobControl2.addDependingJob(jobControl1);
 
         ControlledJob jobControl3 = new ControlledJob(job.getConfiguration());
         jobControl3.setJob(job3);
         jobControl3.addDependingJob(jobControl2);
 
         JobControl jobControl = new JobControl("job-control");
-        jobControl.addJob(jobControl1);
         jobControl.addJob(jobControl2);
         jobControl.addJob(jobControl3);
 

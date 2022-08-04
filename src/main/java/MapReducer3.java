@@ -72,9 +72,35 @@ public class MapReducer3 {
             extends Reducer<Text, SlotMaps, Text, SlotMaps> {
 
         private S3Helper s3helper;
-        private double sum = 0;
+        private double sum = 10000000;
         protected void setup(Reducer.Context context) throws IOException, InterruptedException {
             s3helper = new S3Helper();
+        }
+        public void combine(Text key, Iterable<SlotMaps> values,
+                            Context context
+        ) throws IOException, InterruptedException {
+            MapWritable slotXMap, slotYMap;
+            SlotMaps maps_output = new SlotMaps();
+            double slotXSum = 0.;
+            double tempX = 0.;
+            for (SlotMaps maps : values) {
+                slotXMap = maps.getSlotXMap();
+                slotYMap = maps.getSlotYMap();
+                for (Writable v : slotXMap.keySet()) {
+                    Text tempText = (Text) v;
+                    String tempString = tempText.toString();
+                    slotXSum += ((DoubleWritable) slotXMap.get(tempText)).get();
+                    tempX = ((DoubleWritable) slotXMap.get(v)).get();
+                    maps_output.addToSlotX(v.toString(), tempX + slotXSum);
+                }
+                for (Writable v : slotYMap.keySet()) {
+                    Text tempText = (Text) v;
+                    String tempString = tempText.toString();
+                    slotXSum += ((DoubleWritable) slotYMap.get(tempText)).get();
+                    tempX = ((DoubleWritable) slotYMap.get(v)).get();
+                    maps_output.addToSlotY(v.toString(), tempX + slotXSum);
+                }
+            }
         }
 
         public void reduce(Text key, Iterable<SlotMaps> values,
@@ -139,9 +165,6 @@ public class MapReducer3 {
                 aggrSlotYTotal.put(secondFillerStr, aggrSlotYTotal.getOrDefault(secondFillerStr, 0.) + secondFiller);
             }
 
-            if(sum < 1){
-                System.out.println();
-            }
             HashMap<String, Double> slotXFeatures = calculateFeatures(aggrSlotX, aggrSlotXTotal, sum/2, accumulated_path);
             HashMap<String, Double> slotYFeatures = calculateFeatures(aggrSlotY, aggrSlotYTotal, sum/2, accumulated_path);
 
@@ -153,6 +176,38 @@ public class MapReducer3 {
             JSONObject obj = new JSONObject(bothFeatures);
             String keyName = "output/" + key.toString().replace(',','_') + ".json";
             s3helper.writeToS3(obj, keyName);
+        }
+    }
+
+    public static class Combiner3
+            extends Reducer<Text, SlotMaps, Text, SlotMaps> {
+
+
+        public void reduce(Text key, Iterable<SlotMaps> values,
+                            Context context
+        ) throws IOException, InterruptedException {
+            MapWritable slotXMap, slotYMap;
+            SlotMaps maps_output = new SlotMaps();
+            double slotXSum = 0.;
+            double tempX = 0.;
+            for (SlotMaps maps : values) {
+                slotXMap = maps.getSlotXMap();
+                slotYMap = maps.getSlotYMap();
+                for (Writable v : slotXMap.keySet()) {
+                    Text tempText = (Text) v;
+                    String tempString = tempText.toString();
+                    slotXSum += ((DoubleWritable) slotXMap.get(tempText)).get();
+                    tempX = ((DoubleWritable) slotXMap.get(v)).get();
+                    maps_output.addToSlotX(v.toString(), tempX + slotXSum);
+                }
+                for (Writable v : slotYMap.keySet()) {
+                    Text tempText = (Text) v;
+                    String tempString = tempText.toString();
+                    slotXSum += ((DoubleWritable) slotYMap.get(tempText)).get();
+                    tempX = ((DoubleWritable) slotYMap.get(v)).get();
+                    maps_output.addToSlotY(v.toString(), tempX + slotXSum);
+                }
+            }
         }
     }
 

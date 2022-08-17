@@ -151,6 +151,25 @@ public class MapReducer1 {
         }
     }
 
+
+    public static class Combiner1
+            extends Reducer<SentenceOneX, DoubleWritable2, SentenceOneX, DoubleWritable2> {
+        private double fillerX_sum = 0.;
+        private static String fillerX = "";
+
+
+        public void reduce(SentenceOneX key, Iterable<DoubleWritable2> values,
+                           Context context
+        ) throws IOException, InterruptedException {
+
+            double sum = 0;
+            for(DoubleWritable2 val : values) {
+                sum += val.getSumOfPath().get();
+            }
+            context.write(key, new DoubleWritable2(0., sum));
+        }
+    }
+
     public static class SlotXPartitioner extends Partitioner<SentenceOneX, DoubleWritable2> {
         @Override
         public int getPartition(SentenceOneX sentenceOne, DoubleWritable2 doubleWritable, int i) {

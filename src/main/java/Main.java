@@ -22,7 +22,7 @@ public class Main {
         job.setMapOutputValueClass(DoubleWritable2.class);
         job.setReducerClass(MapReducer1.Reducer1.class);
         job.setPartitionerClass(MapReducer1.SlotXPartitioner.class);
-        job.setCombinerClass(MapReducer1.Reducer1.class);
+        job.setCombinerClass(MapReducer1.Combiner1.class);
         job.setOutputKeyClass(SentenceOneX.class);
         job.setOutputValueClass(DoubleWritable2.class);
         MultipleInputs.addInputPath(job, new Path("s3://hannadirtproject/projectinput/DIRTinput1"), TextInputFormat.class, MapReducer1.Mapper1.class);

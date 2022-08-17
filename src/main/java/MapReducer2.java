@@ -80,12 +80,13 @@ public class MapReducer2 {
 
             double sum = 0;
 
-//            if (key.getPath().equals("*")){
-//                for (DoubleWritable2 d:
-//                     values)
-//                    all_sum = d.getSumOfPath();
-//                return;
-//            }
+           if (key.getPath().equals("*")){
+               for (DoubleWritable3 d:
+                    values){
+                   context.write(key, d);
+                   return;
+               }
+           }
 
             if (key.getPath().equals("Y")) {
                 for (DoubleWritable3 d:
